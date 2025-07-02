@@ -10,13 +10,13 @@ COPY . .
 RUN npm run build
 
 # Serve step
-FROM nginx:alpine
+FROM nginxinc/nginx-unprivileged:stable-alpine
 
 # Copy build output to nginx html directory
 COPY --from=builder /app/dist /usr/share/nginx/html
 
 # Expose nginx port
-EXPOSE 80
+EXPOSE 8080
 
 # Start nginx
 CMD ["nginx", "-g", "daemon off;"]

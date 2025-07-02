@@ -1,4 +1,9 @@
 import os
+
+os.environ["HF_HOME"] = "/tmp/huggingface"
+os.environ["HUGGINGFACE_HUB_CACHE"] = "/tmp/huggingface"
+os.environ["TRANSFORMERS_CACHE"] = "/tmp/huggingface"
+
 import yaml
 import pdfplumber
 from pathlib import Path
