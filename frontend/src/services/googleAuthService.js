@@ -1,5 +1,3 @@
-import { GOOGLE_CLIENT_ID } from '../config/googleAuth';
-
 class GoogleAuthService {
   constructor() {
     this.isInitialized = false;
@@ -38,10 +36,27 @@ class GoogleAuthService {
   async loadAuth2() {
     return new Promise((resolve, reject) => {
       try {
+        const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+        
+        // Debug environment variables
+        console.log('=== Environment Variables Debug ===');
+        console.log('All env variables:', import.meta.env);
+        console.log('VITE_GOOGLE_CLIENT_ID:', clientId);
+        console.log('Client ID length:', clientId ? clientId.length : 'undefined');
+        console.log('Client ID type:', typeof clientId);
+        console.log('===================================');
+        
+        if (!clientId) {
+          reject(new Error('Google Client ID not found in environment variables'));
+          return;
+        }
+
+        console.log('Initializing with Client ID:', clientId);
+
         window.gapi.load('auth2', {
           callback: () => {
             window.gapi.auth2.init({
-              client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
+              client_id: clientId,
               scope: 'email profile'
             }).then(() => {
               this.isInitialized = true;
@@ -49,6 +64,10 @@ class GoogleAuthService {
               resolve();
             }).catch((error) => {
               console.error('Failed to initialize Google Auth2:', error);
+              console.error('Error details:', {
+                error: error.error,
+                details: error.details
+              });
               reject(error);
             });
           },

@@ -4,6 +4,7 @@ import { Navigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { SparklesIcon } from '@heroicons/react/24/outline';
 import GoogleSignInButton from '../components/GoogleSignInButton';
+// import EnvDebug from '../components/EnvDebug';
 
 const LoginPage = () => {
   const { user, loading } = useAuth();
@@ -99,6 +100,9 @@ const LoginPage = () => {
           </div>
         </motion.div>
       </div>
+      
+      {/* Temporary Debug Component - Remove in production */}
+      {/* {import.meta.env.DEV && <EnvDebug />} */}
     </div>
   );
 };

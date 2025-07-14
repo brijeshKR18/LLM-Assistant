@@ -6,9 +6,9 @@ import os
 from typing import Dict, Any
 
 # OAuth configuration
-GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID')
-GOOGLE_CLIENT_SECRET = os.environ.get('GOOGLE_CLIENT_SECRET')
-FRONTEND_URL = "http://localhost:5173"
+GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID','600330164369-paluceqnco6eku36jpha2s2c4vp19dng.apps.googleusercontent.com')
+GOOGLE_CLIENT_SECRET = os.environ.get('GOOGLE_CLIENT_SECRET','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')
+FRONTEND_URL = os.environ.get('FRONTEND_URL', "http://localhost:5173")
 
 # Initialize OAuth
 oauth = OAuth()
