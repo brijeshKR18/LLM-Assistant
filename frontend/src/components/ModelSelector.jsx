@@ -46,7 +46,7 @@ function ModelSelector({ value, onChange, disabled = false }) {
                 type="button"
                 onClick={() => !disabled && setIsOpen(!isOpen)}
                 disabled={disabled}
-                className="relative w-full cursor-pointer rounded-full bg-gray-100 hover:bg-gray-200 py-3 px-4 text-left shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="relative w-full cursor-pointer rounded-full bg-gray-100 hover:bg-gray-200 py-3 px-4 text-left shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed z-10"
             >
                 <span className="flex items-center space-x-2">
                     <CpuChipIcon className="h-5 w-5 text-gray-600" />
@@ -69,7 +69,7 @@ function ModelSelector({ value, onChange, disabled = false }) {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
                         transition={{ duration: 0.1 }}
-                        className="absolute bottom-full mb-2 right-0 w-64 bg-white rounded-xl shadow-lg ring-1 ring-black ring-opacity-5 z-50"
+                        className="absolute bottom-full mb-2 right-0 w-64 bg-white rounded-xl shadow-xl ring-1 ring-black ring-opacity-5 z-[9999] border"
                         style={{
                             maxWidth: 'calc(100vw - 32px)',
                             transform: 'translateX(0)',

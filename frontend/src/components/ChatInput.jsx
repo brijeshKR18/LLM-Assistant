@@ -64,34 +64,35 @@ function ChatInput() {
   };
 
   return (
-    <div className="space-y-3 overflow-hidden">
+    <div className="space-y-4">
       {/* Uploaded File Display */}
       {uploadedFile && (
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -10 }}
-          className="flex items-center justify-between p-3 bg-indigo-50 border border-indigo-200 rounded-lg"
+          className="flex items-center justify-between p-3 bg-gradient-to-r from-indigo-50 to-white border border-indigo-200 rounded-xl shadow-sm"
         >
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center gap-3">
             <div className="w-2 h-2 bg-indigo-600 rounded-full"></div>
-            <span className="text-sm text-indigo-800 font-medium">
+            <span className="text-sm text-indigo-900 font-semibold truncate max-w-xs">
               {uploadedFile.name}
             </span>
           </div>
           <button
             type="button"
             onClick={handleDeleteFile}
-            className="p-1 hover:bg-indigo-200 rounded-full transition-colors"
+            className="p-2 hover:bg-indigo-100 rounded-full transition-colors"
+            aria-label="Remove file"
           >
-            <XMarkIcon className="h-4 w-4 text-indigo-600" />
+            <XMarkIcon className="h-5 w-5 text-indigo-600" />
           </button>
         </motion.div>
       )}
 
       {/* Input Form */}
-      <form onSubmit={handleSubmit} className="relative overflow-hidden">
-        <div className="flex items-end space-x-3 overflow-hidden">
+      <form onSubmit={handleSubmit} className="relative">
+        <div className="flex items-end gap-4 relative overflow-visible">
           {/* Text Input */}
           <div className="flex-1 relative">
             <textarea
@@ -99,10 +100,10 @@ function ChatInput() {
               onChange={(e) => setInput(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder="Type your message..."
-              className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none bg-white shadow-sm"
+              className="w-full px-4 py-3 pr-14 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none bg-white shadow-md text-gray-900 placeholder-gray-400 transition-all"
               disabled={isLoading}
               rows={1}
-              style={{ 
+              style={{
                 minHeight: '48px',
                 maxHeight: '120px',
                 resize: 'none'
@@ -115,39 +116,41 @@ function ChatInput() {
           </div>
 
           {/* Action Buttons */}
-          <div className="flex items-center space-x-2 flex-shrink-0 overflow-visible">
+          <div className="flex items-center gap-2 flex-shrink-0">
             {/* File Upload */}
             {!uploadedFile && (
               <FileUpload onFileUpload={handleFileChange} />
             )}
 
             {/* Model Selector */}
-            <div className="relative overflow-visible">
+            <div className="relative z-50">
               <ModelSelector value={selectedModel} onChange={handleModelChange} />
             </div>
 
             {/* Send/Stop Button */}
             {isLoading ? (
               <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                whileHover={{ scale: 1.07 }}
+                whileTap={{ scale: 0.97 }}
                 type="button"
                 onClick={cancelRequest}
-                className="p-3 bg-red-600 hover:bg-red-700 text-white rounded-full shadow-lg transition-colors"
+                className="p-3 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white rounded-full shadow-lg transition-colors"
+                aria-label="Stop"
               >
                 <StopIcon className="h-5 w-5" />
               </motion.button>
             ) : (
               <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                whileHover={{ scale: 1.07 }}
+                whileTap={{ scale: 0.97 }}
                 type="submit"
                 disabled={!input.trim()}
                 className={`p-3 rounded-full shadow-lg transition-all ${
                   input.trim()
-                    ? 'bg-indigo-600 hover:bg-indigo-700 text-white'
-                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    ? 'bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-700 hover:to-indigo-600 text-white'
+                    : 'bg-gray-200 text-gray-400 cursor-not-allowed'
                 }`}
+                aria-label="Send"
               >
                 <PaperAirplaneIcon className="h-5 w-5" />
               </motion.button>

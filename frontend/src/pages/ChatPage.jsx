@@ -36,7 +36,7 @@ const ChatPage = () => {
       </AnimatePresence>
 
       {/* Main Chat Area */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col relative overflow-visible">
         {/* Header */}
         <header className="bg-white/80 backdrop-blur-sm border-b border-gray-200 px-4 py-3 flex items-center justify-between">
           <div className="flex items-center space-x-3">
@@ -87,24 +87,6 @@ const ChatPage = () => {
                   Start a conversation with our AI assistant. Ask questions, get help with tasks, or just chat!
                 </p>
               </div>
-              {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl">
-                {[
-                  "How can I improve my productivity?",
-                  "Explain quantum computing",
-                  "Write a creative story",
-                  "Help me with coding"
-                ].map((suggestion, index) => (
-                  <motion.div
-                    key={suggestion}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                    className="p-4 border border-gray-200 rounded-lg hover:border-indigo-300 hover:shadow-sm transition-all cursor-pointer"
-                  >
-                    <p className="text-sm text-gray-700">{suggestion}</p>
-                  </motion.div>
-                ))}
-              </div> */}
             </motion.div>
           ) : (
             <ChatContainer messages={currentChat.messages} isLoading={isLoading} />
@@ -112,7 +94,7 @@ const ChatPage = () => {
         </div>
 
         {/* Chat Input */}
-        <div className="bg-white border-t border-gray-200 p-4">
+        <div className="bg-white border-t border-gray-200 p-4 relative overflow-visible">
           <ChatInput />
         </div>
       </div>

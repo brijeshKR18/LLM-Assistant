@@ -210,3 +210,6 @@ frontend/dist/
 backend/build/
 backend/dist/
 out/
+
+architecture_flows/
+architecture_flows_2.0/
