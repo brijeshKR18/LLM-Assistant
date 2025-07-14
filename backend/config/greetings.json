@@ -1,0 +1,16 @@
+{
+  "greetings": [
+    {
+      "pattern": "(hi|hello|hey|yo|hola|greetings|salut|ciao)[!?.]*",
+      "response": "Hello! How can I assist you with your configuration queries?"
+    },
+    {
+      "pattern": "good\\s*(morning|afternoon|evening|day)[!?.]*",
+      "response": "Good {time_of_day}! How can I help with your configuration needs?"
+    },
+    {
+      "pattern": "what\\'?s\\s*up|sup[!?.]*",
+      "response": "Hey there! Ready to dive into your configuration questions?"
+    }
+  ]
+}

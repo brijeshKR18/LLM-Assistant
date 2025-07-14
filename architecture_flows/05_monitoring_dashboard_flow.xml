@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2025-01-10T10:00:00.000Z" agent="5.0" etag="monitoring-dashboard" version="21.6.5" type="device">
+  <diagram name="Monitoring Dashboard Flow" id="monitoring-dashboard-flow">
+    <mxGraphModel dx="1422" dy="794" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        
+        <!-- Title -->
+        <mxCell id="title" value="Configuration Guidance API - Monitoring &amp; Health Dashboard" style="text;strokeColor=none;fillColor=none;html=1;fontSize=20;fontStyle=1;verticalAlign=middle;align=center;" vertex="1" parent="1">
+          <mxGeometry x="200" y="20" width="720" height="40" as="geometry" />
+        </mxCell>
+        
+        <!-- Admin Request -->
+        <mxCell id="admin-request" value="Admin/DevOps&#xa;Request" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="80" y="100" width="120" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- System Status -->
+        <mxCell id="system-status" value="GET /debug/system-status&#xa;&#xa;✓ Vector store status&#xa;✓ Parsed data count&#xa;✓ FAISS index exists&#xa;✓ Directory checks&#xa;✓ Model configuration" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="250" y="80" width="180" height="100" as="geometry" />
+        </mxCell>
+        
+        <!-- Offline Status -->
+        <mxCell id="offline-status" value="GET /debug/offline-status&#xa;&#xa;✓ Local Ollama running&#xa;✓ Base URL config&#xa;✓ Internet restrictions&#xa;✓ Prompt configuration&#xa;✓ Service recommendations" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="470" y="80" width="180" height="100" as="geometry" />
+        </mxCell>
+        
+        <!-- Circuit Breaker -->
+        <mxCell id="circuit-breaker" value="GET /debug/circuit-breaker&#xa;&#xa;✓ Circuit breaker state&#xa;✓ Failure count&#xa;✓ Recovery timeout&#xa;✓ LLM health check&#xa;✓ Recovery recommendations" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="690" y="80" width="180" height="100" as="geometry" />
+        </mxCell>
+        
+        <!-- Uploaded Files -->
+        <mxCell id="uploaded-files" value="GET /debug/uploaded-files&#xa;&#xa;✓ List active uploads&#xa;✓ File sizes&#xa;✓ Modification times&#xa;✓ File validation" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="910" y="80" width="180" height="100" as="geometry" />
+        </mxCell>
+        
+        <!-- Health Check Decision -->
+        <mxCell id="health-check" value="Overall System&#xa;Health Check" style="rhombus;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="540" y="220" width="120" height="80" as="geometry" />
+        </mxCell>
+        
+        <!-- System Healthy -->
+        <mxCell id="system-healthy" value="System Status: HEALTHY&#xa;&#xa;✓ All services operational&#xa;✓ LLM responding&#xa;✓ Vector store ready&#xa;✓ Files processing&#xa;✓ Offline mode active" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="320" y="340" width="200" height="100" as="geometry" />
+        </mxCell>
+        
+        <!-- System Degraded -->
+        <mxCell id="system-degraded" value="System Status: DEGRADED&#xa;&#xa;⚠️ Some services limited&#xa;⚠️ Circuit breaker active&#xa;⚠️ Fallback responses&#xa;⚠️ Reduced functionality" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="560" y="340" width="200" height="100" as="geometry" />
+        </mxCell>
+        
+        <!-- System Error -->
+        <mxCell id="system-error" value="System Status: ERROR&#xa;&#xa;❌ Critical failure&#xa;❌ LLM unavailable&#xa;❌ Core functions down&#xa;❌ Immediate attention required" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="800" y="340" width="200" height="100" as="geometry" />
+        </mxCell>
+        
+        <!-- Automated Actions -->
+        <mxCell id="auto-actions" value="Automated Recovery Actions&#xa;&#xa;• Clear temp files&#xa;• Reset circuit breaker&#xa;• Restart LLM connection&#xa;• Rebuild vector store&#xa;• Log critical events" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="80" y="460" width="200" height="100" as="geometry" />
+        </mxCell>
+        
+        <!-- Manual Actions -->
+        <mxCell id="manual-actions" value="Manual Intervention&#xa;&#xa;• DELETE /debug/clear-uploads&#xa;• Restart Ollama service&#xa;• Check system resources&#xa;• Verify model availability&#xa;• Review application logs" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="320" y="460" width="200" height="100" as="geometry" />
+        </mxCell>
+        
+        <!-- Alert System -->
+        <mxCell id="alert-system" value="Alert &amp; Notification&#xa;&#xa;• Log structured events&#xa;• Send notifications&#xa;• Update dashboards&#xa;• Generate reports&#xa;• Trigger escalation" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0f0f0;strokeColor=#666666;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="560" y="460" width="200" height="100" as="geometry" />
+        </mxCell>
+        
+        <!-- Monitoring Loop -->
+        <mxCell id="monitoring-loop" value="Continuous Monitoring&#xa;&#xa;• Periodic health checks&#xa;• Performance metrics&#xa;• Resource utilization&#xa;• Error rate tracking&#xa;• Trend analysis" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="800" y="460" width="200" height="100" as="geometry" />
+        </mxCell>
+        
+        <!-- Flow Arrows -->
+        <mxCell id="arrow1" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#333333;" edge="1" parent="1" source="admin-request" target="system-status">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="arrow2" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#333333;" edge="1" parent="1" source="system-status" target="offline-status">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="arrow3" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#333333;" edge="1" parent="1" source="offline-status" target="circuit-breaker">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="arrow4" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#333333;" edge="1" parent="1" source="circuit-breaker" target="uploaded-files">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="arrow5" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#333333;" edge="1" parent="1" source="system-status" target="health-check">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="arrow6" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#333333;" edge="1" parent="1" source="offline-status" target="health-check">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="arrow7" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#333333;" edge="1" parent="1" source="circuit-breaker" target="health-check">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="arrow8" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#333333;" edge="1" parent="1" source="uploaded-files" target="health-check">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="arrow9" value="All Good" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#82b366;" edge="1" parent="1" source="health-check" target="system-healthy">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="arrow10" value="Issues" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#d6b656;" edge="1" parent="1" source="health-check" target="system-degraded">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="arrow11" value="Critical" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#b85450;" edge="1" parent="1" source="health-check" target="system-error">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="arrow12" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#333333;" edge="1" parent="1" source="system-healthy" target="monitoring-loop">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="arrow13" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#333333;" edge="1" parent="1" source="system-degraded" target="auto-actions">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="arrow14" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#333333;" edge="1" parent="1" source="system-error" target="manual-actions">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="arrow15" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#333333;" edge="1" parent="1" source="auto-actions" target="alert-system">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="arrow16" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#333333;" edge="1" parent="1" source="manual-actions" target="alert-system">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="arrow17" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#333333;" edge="1" parent="1" source="alert-system" target="monitoring-loop">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- Feedback Loop -->
+        <mxCell id="feedback-arrow" value="Continuous Feedback Loop" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=3;strokeColor=#6c8ebf;dashed=1;" edge="1" parent="1" source="monitoring-loop" target="admin-request">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="900" y="600" as="sourcePoint" />
+            <mxPoint x="140" y="600" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- Legend -->
+        <mxCell id="legend-bg" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;strokeWidth=1;" vertex="1" parent="1">
+          <mxGeometry x="80" y="600" width="1000" height="120" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="legend-title" value="Monitoring Dashboard Components" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontStyle=1;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="500" y="610" width="200" height="20" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="legend-healthy" value="System Healthy" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=1;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="100" y="640" width="100" height="30" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="legend-degraded" value="System Degraded" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;strokeWidth=1;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="220" y="640" width="100" height="30" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="legend-error" value="System Error" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;strokeWidth=1;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="340" y="640" width="100" height="30" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="legend-debug" value="Debug Endpoints" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=1;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="460" y="640" width="100" height="30" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="legend-auto" value="Automated Actions" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;strokeWidth=1;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="580" y="640" width="100" height="30" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="legend-manual" value="Manual Actions" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;strokeWidth=1;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="700" y="640" width="100" height="30" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="legend-monitoring" value="Continuous Monitoring" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0f0f0;strokeColor=#666666;strokeWidth=1;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="820" y="640" width="120" height="30" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="legend-endpoints" value="Available Debug Endpoints: /debug/system-status, /debug/offline-status, /debug/circuit-breaker, /debug/uploaded-files, /debug/clear-uploads" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="100" y="680" width="840" height="30" as="geometry" />
+        </mxCell>
+        
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

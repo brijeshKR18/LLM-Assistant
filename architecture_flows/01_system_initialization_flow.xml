@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2025-07-10T10:00:00.000Z" agent="5.0" etag="system-init" version="21.6.5" type="device">
+  <diagram name="System Initialization Flow" id="system-init-flow">
+    <mxGraphModel dx="1422" dy="794" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        
+        <!-- Title -->
+        <mxCell id="title" value="Configuration Guidance API - System Initialization Flow" style="text;strokeColor=none;fillColor=none;html=1;fontSize=20;fontStyle=1;verticalAlign=middle;align=center;" vertex="1" parent="1">
+          <mxGeometry x="290" y="20" width="590" height="40" as="geometry" />
+        </mxCell>
+        
+        <!-- Start -->
+        <mxCell id="start" value="Application Start" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="80" y="80" width="120" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- Initialize Logging -->
+        <mxCell id="init-logging" value="Initialize Logging&#xa;System&#xa;&#xa;• Create logs directory&#xa;• Setup JSON formatter&#xa;• Configure file handler" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="260" y="80" width="140" height="80" as="geometry" />
+        </mxCell>
+        
+        <!-- Load SpaCy -->
+        <mxCell id="load-spacy" value="Load SpaCy NLP Model&#xa;&#xa;• Load en_core_web_sm&#xa;• Initialize greeting detection" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="450" y="80" width="140" height="70" as="geometry" />
+        </mxCell>
+        
+        <!-- Load Greetings Config -->
+        <mxCell id="load-greetings" value="Load Greetings&#xa;Configuration&#xa;&#xa;• Read greetings.json&#xa;• Parse patterns" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="640" y="80" width="140" height="70" as="geometry" />
+        </mxCell>
+        
+        <!-- Initialize LLM -->
+        <mxCell id="init-llm" value="Initialize Offline LLM&#xa;&#xa;• Configure OllamaLLM&#xa;• Set base_url localhost:11434&#xa;• Apply offline system prompt&#xa;• Validate connection" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="80" y="200" width="160" height="90" as="geometry" />
+        </mxCell>
+        
+        <!-- Check FAISS Index -->
+        <mxCell id="check-faiss" value="Check Existing&#xa;FAISS Index" style="rhombus;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="300" y="210" width="100" height="70" as="geometry" />
+        </mxCell>
+        
+        <!-- Load Existing Index -->
+        <mxCell id="load-index" value="Load Existing&#xa;FAISS Index&#xa;&#xa;• Load embeddings model&#xa;• Deserialize index&#xa;• Initialize vector store" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="460" y="180" width="140" height="80" as="geometry" />
+        </mxCell>
+        
+        <!-- Process NAS Files -->
+        <mxCell id="process-nas" value="Process NAS Files&#xa;&#xa;• Scan nas_data directory&#xa;• Parse PDF, YAML, SH, HTML&#xa;• Extract content &amp; metadata&#xa;• Store in parsed_data[]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="280" y="320" width="140" height="90" as="geometry" />
+        </mxCell>
+        
+        <!-- Create Vector Store -->
+        <mxCell id="create-vs" value="Create Vector Store&#xa;&#xa;• Generate embeddings&#xa;• Build FAISS index&#xa;• Save to disk" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="480" y="320" width="140" height="80" as="geometry" />
+        </mxCell>
+        
+        <!-- Initialize QA Chain -->
+        <mxCell id="init-qa" value="Initialize QA Chain&#xa;&#xa;• Create offline prompt template&#xa;• Configure retriever&#xa;• Set up RetrievalQA chain&#xa;• Apply strict context rules" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="680" y="200" width="160" height="90" as="geometry" />
+        </mxCell>
+        
+        <!-- Validate Offline Mode -->
+        <mxCell id="validate-offline" value="Validate Offline Mode&#xa;&#xa;• Check Ollama connectivity&#xa;• Verify local endpoints&#xa;• Log status" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="880" y="80" width="140" height="80" as="geometry" />
+        </mxCell>
+        
+        <!-- Ready -->
+        <mxCell id="ready" value="System Ready&#xa;for Requests" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="890" y="210" width="120" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- Error Handler -->
+        <mxCell id="error-handler" value="Error Handler&#xa;&#xa;• Log initialization errors&#xa;• Set fallback states&#xa;• Continue with limited functionality" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="680" y="320" width="160" height="80" as="geometry" />
+        </mxCell>
+        
+        <!-- Arrows -->
+        <mxCell id="arrow1" value="" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="start" target="init-logging">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="220" y="110" as="sourcePoint" />
+            <mxPoint x="270" y="60" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="arrow2" value="" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="init-logging" target="load-spacy">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="420" y="120" as="sourcePoint" />
+            <mxPoint x="470" y="70" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="arrow3" value="" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="load-spacy" target="load-greetings">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="610" y="115" as="sourcePoint" />
+            <mxPoint x="660" y="65" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="arrow4" value="" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="load-greetings" target="validate-offline">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="800" y="115" as="sourcePoint" />
+            <mxPoint x="850" y="65" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="arrow5" value="" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="start" target="init-llm">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="140" y="160" as="sourcePoint" />
+            <mxPoint x="190" y="110" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="arrow6" value="" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="init-llm" target="check-faiss">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="260" y="245" as="sourcePoint" />
+            <mxPoint x="310" y="195" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="arrow7" value="Index Exists" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="check-faiss" target="load-index">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="420" y="245" as="sourcePoint" />
+            <mxPoint x="470" y="195" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="arrow8" value="No Index" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="check-faiss" target="process-nas">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="350" y="300" as="sourcePoint" />
+            <mxPoint x="400" y="250" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="arrow9" value="" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="process-nas" target="create-vs">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="440" y="365" as="sourcePoint" />
+            <mxPoint x="490" y="315" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="arrow10" value="" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="load-index" target="init-qa">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="620" y="220" as="sourcePoint" />
+            <mxPoint x="670" y="170" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="arrow11" value="" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="create-vs" target="init-qa">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="550" y="300" as="sourcePoint" />
+            <mxPoint x="600" y="250" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="arrow12" value="" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="init-qa" target="ready">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="860" y="245" as="sourcePoint" />
+            <mxPoint x="910" y="195" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="arrow13" value="Error" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeColor=#ff0000;" edge="1" parent="1" source="init-qa" target="error-handler">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="760" y="310" as="sourcePoint" />
+            <mxPoint x="810" y="260" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- Legend -->
+        <mxCell id="legend-bg" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="80" y="450" width="940" height="120" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="legend-title" value="Component Legend" style="text;strokeColor=none;fillColor=none;html=1;fontSize=14;fontStyle=1;verticalAlign=middle;align=left;" vertex="1" parent="1">
+          <mxGeometry x="100" y="460" width="150" height="20" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="legend-logging" value="Logging &amp; Config" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="100" y="490" width="100" height="30" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="legend-nlp" value="NLP Processing" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="220" y="490" width="100" height="30" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="legend-llm" value="LLM &amp; AI Chain" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="340" y="490" width="100" height="30" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="legend-vector" value="Vector Store" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="460" y="490" width="100" height="30" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="legend-decision" value="Decision Points" style="rhombus;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="580" y="490" width="80" height="30" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="legend-success" value="Success States" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="680" y="490" width="100" height="30" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="legend-error" value="Error Handling" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="800" y="490" width="100" height="30" as="geometry" />
+        </mxCell>
+        
+        <!-- Key Features -->
+        <mxCell id="features-title" value="Key System Features:" style="text;strokeColor=none;fillColor=none;html=1;fontSize=12;fontStyle=1;verticalAlign=middle;align=left;" vertex="1" parent="1">
+          <mxGeometry x="100" y="530" width="150" height="20" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="feature1" value="• Offline-first LLM configuration with local Ollama" style="text;strokeColor=none;fillColor=none;html=1;fontSize=10;verticalAlign=middle;align=left;" vertex="1" parent="1">
+          <mxGeometry x="120" y="545" width="300" height="15" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="feature2" value="• FAISS vector store with persistent indexing" style="text;strokeColor=none;fillColor=none;html=1;fontSize=10;verticalAlign=middle;align=left;" vertex="1" parent="1">
+          <mxGeometry x="450" y="545" width="300" height="15" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="feature3" value="• Multi-format document parsing (PDF, YAML, SH, HTML)" style="text;strokeColor=none;fillColor=none;html=1;fontSize=10;verticalAlign=middle;align=left;" vertex="1" parent="1">
+          <mxGeometry x="120" y="560" width="300" height="15" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="feature4" value="• Intelligent greeting detection with SpaCy NLP" style="text;strokeColor=none;fillColor=none;html=1;fontSize=10;verticalAlign=middle;align=left;" vertex="1" parent="1">
+          <mxGeometry x="450" y="560" width="300" height="15" as="geometry" />
+        </mxCell>
+        
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

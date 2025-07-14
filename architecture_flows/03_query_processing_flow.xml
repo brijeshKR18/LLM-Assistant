@@ -1,0 +1,413 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2025-07-10T10:00:00.000Z" agent="5.0" etag="query-processing" version="21.6.5" type="device">
+  <diagram name="Query Processing Flow" id="query-processing-flow">
+    <mxGraphModel dx="1422" dy="794" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        
+        <!-- Title -->
+        <mxCell id="title" value="Configuration Guidance API - Query Processing Flow with Offline LLM" style="text;strokeColor=none;fillColor=none;html=1;fontSize=20;fontStyle=1;verticalAlign=middle;align=center;" vertex="1" parent="1">
+          <mxGeometry x="350" y="20" width="700" height="40" as="geometry" />
+        </mxCell>
+        
+        <!-- Client Query -->
+        <mxCell id="client-query" value="Client POST Request&#xa;/query&#xa;&#xa;{&#xa;  &quot;query&quot;: &quot;How to setup DNS?&quot;,&#xa;  &quot;model&quot;: &quot;mistral:instruct&quot;,&#xa;  &quot;filename&quot;: &quot;dns_guide.pdf&quot;&#xa;}" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="80" y="80" width="140" height="100" as="geometry" />
+        </mxCell>
+        
+        <!-- Log Request -->
+        <mxCell id="log-request" value="Log Incoming Request&#xa;&#xa;• Query content&#xa;• Model selection&#xa;• Filename (if any)&#xa;• Timestamp" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="270" y="90" width="120" height="80" as="geometry" />
+        </mxCell>
+        
+        <!-- Greeting Detection -->
+        <mxCell id="greeting-check" value="Greeting Detection&#xa;&#xa;SpaCy NLP Analysis" style="rhombus;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="440" y="95" width="120" height="70" as="geometry" />
+        </mxCell>
+        
+        <!-- Greeting Response -->
+        <mxCell id="greeting-response" value="Return Greeting&#xa;Response&#xa;&#xa;• Clear temp files&#xa;• Return configured&#xa;  greeting message" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="600" y="60" width="120" height="80" as="geometry" />
+        </mxCell>
+        
+        <!-- Model Validation -->
+        <mxCell id="validate-model" value="Validate Model&#xa;&#xa;Supported:&#xa;• mistral:instruct&#xa;• llama3.1:8b" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="440" y="210" width="120" height="80" as="geometry" />
+        </mxCell>
+        
+        <!-- Initialize LLM -->
+        <mxCell id="init-llm" value="Initialize Offline LLM&#xa;&#xa;• OllamaLLM configuration&#xa;• localhost:11434 endpoint&#xa;• Offline system prompt&#xa;• Temperature &amp; context settings" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="620" y="200" width="140" height="100" as="geometry" />
+        </mxCell>
+        
+        <!-- Process Upload -->
+        <mxCell id="process-upload" value="Process Uploaded File&#xa;(if filename provided)" style="rhombus;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="80" y="210" width="140" height="80" as="geometry" />
+        </mxCell>
+        
+        <!-- File Processing -->
+        <mxCell id="file-processing" value="File Content Processing&#xa;&#xa;• Check file existence&#xa;• Parse by type:&#xa;  - PDF extraction&#xa;  - YAML parsing&#xa;  - Shell script analysis&#xa;  - HTML content&#xa;• Add upload metadata" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="80" y="340" width="140" height="120" as="geometry" />
+        </mxCell>
+        
+        <!-- Vector Store Decision -->
+        <mxCell id="vector-decision" value="Vector Store&#xa;Configuration" style="rhombus;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="280" y="350" width="120" height="80" as="geometry" />
+        </mxCell>
+        
+        <!-- Temp Vector Store -->
+        <mxCell id="temp-vector-store" value="Create Temporary&#xa;Vector Store&#xa;&#xa;• Combine uploaded file&#xa;  with existing data&#xa;• Generate embeddings&#xa;• Create FAISS index&#xa;• Configure retriever (k=5)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="460" y="320" width="140" height="110" as="geometry" />
+        </mxCell>
+        
+        <!-- Existing Vector Store -->
+        <mxCell id="existing-vector-store" value="Use Existing&#xa;Vector Store&#xa;&#xa;• Load from FAISS index&#xa;• Configure retriever&#xa;• Set search parameters" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="270" y="480" width="140" height="90" as="geometry" />
+        </mxCell>
+        
+        <!-- Create QA Chain -->
+        <mxCell id="create-qa-chain" value="Create QA Chain&#xa;&#xa;• Offline prompt template&#xa;• Strict context rules&#xa;• RetrievalQA configuration&#xa;• Source document tracking" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="660" y="350" width="140" height="100" as="geometry" />
+        </mxCell>
+        
+        <!-- OpenShift Check -->
+        <mxCell id="oc-check" value="OpenShift Resource&#xa;Query Detection&#xa;&#xa;Pattern: *.spec" style="rhombus;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="860" y="200" width="120" height="80" as="geometry" />
+        </mxCell>
+        
+        <!-- OC Explain -->
+        <mxCell id="oc-explain" value="Run oc explain&#xa;&#xa;• Execute command&#xa;• Parse output&#xa;• Add to vector store&#xa;• Update index" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="1030" y="160" width="120" height="80" as="geometry" />
+        </mxCell>
+        
+        <!-- Offline Validation -->
+        <mxCell id="offline-validation" value="Offline Mode&#xa;Validation&#xa;&#xa;• Check Ollama connection&#xa;• Validate local endpoints" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="860" y="320" width="120" height="80" as="geometry" />
+        </mxCell>
+        
+        <!-- Query Enhancement -->
+        <mxCell id="query-enhancement" value="Query Enhancement&#xa;&#xa;• Detect internet-seeking terms&#xa;• Add offline disclaimer&#xa;• Log potential issues" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="1030" y="280" width="120" height="80" as="geometry" />
+        </mxCell>
+        
+        <!-- LLM Processing -->
+        <mxCell id="llm-processing" value="LLM Query Processing&#xa;&#xa;• Invoke QA chain&#xa;• Context-only responses&#xa;• Source document retrieval&#xa;• Answer generation" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="660" y="480" width="140" height="100" as="geometry" />
+        </mxCell>
+        
+        <!-- Response Validation -->
+        <mxCell id="response-validation" value="Response Validation" style="rhombus;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="860" y="490" width="120" height="80" as="geometry" />
+        </mxCell>
+        
+        <!-- Success Response -->
+        <mxCell id="success-response" value="Return Success Response&#xa;&#xa;{&#xa;  &quot;answer&quot;: &quot;DNS setup guide...&quot;,&#xa;  &quot;sources&quot;: [&#xa;    {&quot;document&quot;: &quot;dns_guide.pdf&quot;,&#xa;     &quot;page&quot;: 5}&#xa;  ]&#xa;}" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=8;" vertex="1" parent="1">
+          <mxGeometry x="1030" y="430" width="140" height="100" as="geometry" />
+        </mxCell>
+        
+        <!-- No Sources Response -->
+        <mxCell id="no-sources-response" value="No Relevant Sources&#xa;Response&#xa;&#xa;&quot;Sorry, I couldn't find&#xa;relevant information in&#xa;the available documents...&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="860" y="610" width="140" height="90" as="geometry" />
+        </mxCell>
+        
+        <!-- Cleanup -->
+        <mxCell id="cleanup" value="Cleanup Process&#xa;&#xa;• Clear temporary files&#xa;• Log completion&#xa;• Release resources" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="1200" y="480" width="120" height="80" as="geometry" />
+        </mxCell>
+        
+        <!-- Error Responses -->
+        <mxCell id="error-model" value="HTTP 400&#xa;Invalid Model" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="440" y="120" width="100" height="50" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="error-no-docs" value="HTTP 400&#xa;No Documents" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="80" y="480" width="100" height="50" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="error-llm-init" value="HTTP 500&#xa;LLM Init Failed" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="620" y="120" width="100" height="50" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="error-processing" value="HTTP 500&#xa;Query Processing&#xa;Failed" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="660" y="610" width="100" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- Main Flow Arrows -->
+        <mxCell id="arrow1" value="" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="client-query" target="log-request">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="240" y="130" as="sourcePoint" />
+            <mxPoint x="290" y="80" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="arrow2" value="" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="log-request" target="greeting-check">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="410" y="130" as="sourcePoint" />
+            <mxPoint x="460" y="80" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="arrow3" value="Greeting" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="greeting-check" target="greeting-response">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="580" y="100" as="sourcePoint" />
+            <mxPoint x="630" y="50" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="arrow4" value="Not Greeting" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="greeting-check" target="validate-model">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="500" y="180" as="sourcePoint" />
+            <mxPoint x="550" y="130" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="arrow5" value="Valid" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="validate-model" target="init-llm">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="580" y="250" as="sourcePoint" />
+            <mxPoint x="630" y="200" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="arrow6" value="" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="client-query" target="process-upload">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="150" y="200" as="sourcePoint" />
+            <mxPoint x="200" y="150" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="arrow7" value="File Provided" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="process-upload" target="file-processing">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="150" y="310" as="sourcePoint" />
+            <mxPoint x="200" y="260" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="arrow8" value="" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="file-processing" target="vector-decision">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="240" y="400" as="sourcePoint" />
+            <mxPoint x="290" y="350" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="arrow9" value="With Upload" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="vector-decision" target="temp-vector-store">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="420" y="360" as="sourcePoint" />
+            <mxPoint x="470" y="310" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="arrow10" value="No Upload" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="vector-decision" target="existing-vector-store">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="340" y="450" as="sourcePoint" />
+            <mxPoint x="390" y="400" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="arrow11" value="" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="temp-vector-store" target="create-qa-chain">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="620" y="375" as="sourcePoint" />
+            <mxPoint x="670" y="325" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="arrow12" value="" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0;exitDx=0;exitDy=0;entryX=0;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="existing-vector-store" target="create-qa-chain">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="430" y="480" as="sourcePoint" />
+            <mxPoint x="480" y="430" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="arrow13" value="" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="init-llm" target="oc-check">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="780" y="250" as="sourcePoint" />
+            <mxPoint x="830" y="200" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="arrow14" value="OC Query" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="oc-check" target="oc-explain">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1000" y="200" as="sourcePoint" />
+            <mxPoint x="1050" y="150" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="arrow15" value="Regular Query" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="oc-check" target="offline-validation">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="920" y="300" as="sourcePoint" />
+            <mxPoint x="970" y="250" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="arrow16" value="" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="offline-validation" target="query-enhancement">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1000" y="360" as="sourcePoint" />
+            <mxPoint x="1050" y="310" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="arrow17" value="" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=1;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="query-enhancement" target="llm-processing">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1090" y="380" as="sourcePoint" />
+            <mxPoint x="820" y="480" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="1090" y="400" />
+              <mxPoint x="800" y="400" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="arrow18" value="" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="create-qa-chain" target="llm-processing">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="730" y="470" as="sourcePoint" />
+            <mxPoint x="780" y="420" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="arrow19" value="" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="llm-processing" target="response-validation">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="820" y="530" as="sourcePoint" />
+            <mxPoint x="870" y="480" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="arrow20" value="Sources Found" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="response-validation" target="success-response">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1000" y="480" as="sourcePoint" />
+            <mxPoint x="1050" y="430" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="arrow21" value="No Sources" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="response-validation" target="no-sources-response">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="920" y="590" as="sourcePoint" />
+            <mxPoint x="970" y="540" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="arrow22" value="" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="success-response" target="cleanup">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1190" y="480" as="sourcePoint" />
+            <mxPoint x="1240" y="430" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- Error Arrows -->
+        <mxCell id="error-arrow1" value="Invalid" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;strokeColor=#ff0000;" edge="1" parent="1" source="validate-model" target="error-model">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="500" y="190" as="sourcePoint" />
+            <mxPoint x="550" y="140" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="error-arrow2" value="No Docs" style="endArrow=classic;html=1;rounded=0;exitX=0;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeColor=#ff0000;" edge="1" parent="1" source="process-upload" target="error-no-docs">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="80" y="310" as="sourcePoint" />
+            <mxPoint x="130" y="360" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="error-arrow3" value="Init Failed" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;strokeColor=#ff0000;" edge="1" parent="1" source="init-llm" target="error-llm-init">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="690" y="190" as="sourcePoint" />
+            <mxPoint x="740" y="140" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="error-arrow4" value="Processing Error" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeColor=#ff0000;" edge="1" parent="1" source="llm-processing" target="error-processing">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="730" y="600" as="sourcePoint" />
+            <mxPoint x="780" y="550" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- Flow Phases Background -->
+        <mxCell id="phase1-bg" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;strokeWidth=2;opacity=20;" vertex="1" parent="1">
+          <mxGeometry x="70" y="70" width="660" height="120" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="phase1-label" value="Phase 1: Request Validation &amp; Preprocessing" style="text;strokeColor=#9673a6;fillColor=#e1d5e7;html=1;fontSize=10;fontStyle=1;verticalAlign=middle;align=left;strokeWidth=1;" vertex="1" parent="1">
+          <mxGeometry x="80" y="75" width="250" height="15" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="phase2-bg" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=2;opacity=20;" vertex="1" parent="1">
+          <mxGeometry x="70" y="200" width="540" height="380" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="phase2-label" value="Phase 2: Document Processing &amp; Vector Store Management" style="text;strokeColor=#6c8ebf;fillColor=#dae8fc;html=1;fontSize=10;fontStyle=1;verticalAlign=middle;align=left;strokeWidth=1;" vertex="1" parent="1">
+          <mxGeometry x="80" y="205" width="300" height="15" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="phase3-bg" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;strokeWidth=2;opacity=20;" vertex="1" parent="1">
+          <mxGeometry x="620" y="120" width="730" height="460" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="phase3-label" value="Phase 3: LLM Processing &amp; Response Generation" style="text;strokeColor=#d79b00;fillColor=#ffe6cc;html=1;fontSize=10;fontStyle=1;verticalAlign=middle;align=left;strokeWidth=1;" vertex="1" parent="1">
+          <mxGeometry x="630" y="125" width="280" height="15" as="geometry" />
+        </mxCell>
+        
+        <!-- Performance Metrics -->
+        <mxCell id="metrics-bg" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="80" y="750" width="1240" height="120" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="metrics-title" value="Query Processing Performance Characteristics &amp; Optimization Features" style="text;strokeColor=none;fillColor=none;html=1;fontSize=14;fontStyle=1;verticalAlign=middle;align=left;" vertex="1" parent="1">
+          <mxGeometry x="100" y="760" width="500" height="20" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="perf1" value="• Offline LLM Processing: Local Ollama instance prevents network latency" style="text;strokeColor=none;fillColor=none;html=1;fontSize=10;verticalAlign=middle;align=left;" vertex="1" parent="1">
+          <mxGeometry x="120" y="785" width="400" height="15" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="perf2" value="• FAISS Vector Search: Sub-second similarity search with k=5 top results" style="text;strokeColor=none;fillColor=none;html=1;fontSize=10;verticalAlign=middle;align=left;" vertex="1" parent="1">
+          <mxGeometry x="120" y="800" width="400" height="15" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="perf3" value="• Persistent Index: Avoids re-processing NAS documents on restart" style="text;strokeColor=none;fillColor=none;html=1;fontSize=10;verticalAlign=middle;align=left;" vertex="1" parent="1">
+          <mxGeometry x="120" y="815" width="400" height="15" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="perf4" value="• Temporary Vector Store: Dynamic document integration without persistence" style="text;strokeColor=none;fillColor=none;html=1;fontSize=10;verticalAlign=middle;align=left;" vertex="1" parent="1">
+          <mxGeometry x="120" y="830" width="400" height="15" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="perf5" value="• Context Window: 4096 tokens for comprehensive document analysis" style="text;strokeColor=none;fillColor=none;html=1;fontSize=10;verticalAlign=middle;align=left;" vertex="1" parent="1">
+          <mxGeometry x="120" y="845" width="400" height="15" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="security1" value="• Network Isolation: All processing occurs locally without external API calls" style="text;strokeColor=none;fillColor=none;html=1;fontSize=10;verticalAlign=middle;align=left;" vertex="1" parent="1">
+          <mxGeometry x="540" y="785" width="400" height="15" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="security2" value="• Query Sanitization: Detection and handling of internet-seeking terms" style="text;strokeColor=none;fillColor=none;html=1;fontSize=10;verticalAlign=middle;align=left;" vertex="1" parent="1">
+          <mxGeometry x="540" y="800" width="400" height="15" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="security3" value="• Context Enforcement: Strict prompts prevent external knowledge usage" style="text;strokeColor=none;fillColor=none;html=1;fontSize=10;verticalAlign=middle;align=left;" vertex="1" parent="1">
+          <mxGeometry x="540" y="815" width="400" height="15" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="security4" value="• Automatic Cleanup: Temporary files removed after each query" style="text;strokeColor=none;fillColor=none;html=1;fontSize=10;verticalAlign=middle;align=left;" vertex="1" parent="1">
+          <mxGeometry x="540" y="830" width="400" height="15" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="monitoring1" value="• Comprehensive Logging: All operations logged with structured JSON format" style="text;strokeColor=none;fillColor=none;html=1;fontSize=10;verticalAlign=middle;align=left;" vertex="1" parent="1">
+          <mxGeometry x="960" y="785" width="350" height="15" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="monitoring2" value="• Error Tracking: Detailed error context for debugging and monitoring" style="text;strokeColor=none;fillColor=none;html=1;fontSize=10;verticalAlign=middle;align=left;" vertex="1" parent="1">
+          <mxGeometry x="960" y="800" width="350" height="15" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="monitoring3" value="• Performance Metrics: Query timing and source document statistics" style="text;strokeColor=none;fillColor=none;html=1;fontSize=10;verticalAlign=middle;align=left;" vertex="1" parent="1">
+          <mxGeometry x="960" y="815" width="350" height="15" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="monitoring4" value="• Health Checks: Offline mode validation and system status monitoring" style="text;strokeColor=none;fillColor=none;html=1;fontSize=10;verticalAlign=middle;align=left;" vertex="1" parent="1">
+          <mxGeometry x="960" y="830" width="350" height="15" as="geometry" />
+        </mxCell>
+        
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
