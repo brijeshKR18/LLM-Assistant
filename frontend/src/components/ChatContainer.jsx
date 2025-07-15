@@ -6,7 +6,7 @@ const ChatContainer = forwardRef(({ messages, isLoading }, ref) => {
   return (
     <div
       ref={ref}
-      className="space-y-6"
+      className="space-y-6 w-full min-w-0"
     >
       {messages.map((msg, index) => (
         <motion.div
@@ -14,12 +14,12 @@ const ChatContainer = forwardRef(({ messages, isLoading }, ref) => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, delay: index * 0.1 }}
-          className={`flex ${
+          className={`flex w-full min-w-0 ${
             msg.role === 'user' ? 'justify-end' : 'justify-start'
           }`}
         >
           <div
-            className={`max-w-[85%] lg:max-w-[70%] ${
+            className={`max-w-[85%] lg:max-w-[70%] min-w-0 break-words ${
               msg.role === 'user'
                 ? 'bg-indigo-600 text-white rounded-2xl rounded-br-md'
                 : msg.error

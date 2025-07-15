@@ -37,7 +37,7 @@ function Message({ message }) {
   }
 
   return (
-    <div className={`message ${message.role === 'user' ? 'user-message' : 'assistant-message'}`}>
+    <div className={`message min-w-0 overflow-hidden ${message.role === 'user' ? 'user-message' : 'assistant-message'}`}>
       {message.role === 'assistant' && !message.error ? (
         <>
           <div>
@@ -45,17 +45,21 @@ function Message({ message }) {
               part.type === 'code' ? (
                 <div
                   key={idx}
-                  className="bg-gray-600 text-gray-300 rounded-md p-4 overflow-x-auto my-2"
+                  className="bg-gray-600 text-gray-300 rounded-md p-4 my-2 overflow-hidden"
                 >
-                  <ReactMarkdown>{'```\n' + part.value + '\n```'}</ReactMarkdown>
+                  <div className="overflow-x-auto">
+                    <ReactMarkdown>{'```\n' + part.value + '\n```'}</ReactMarkdown>
+                  </div>
                 </div>
               ) : (
-                <div key={idx} className="prose prose-sm dark:prose-invert max-w-none space-y-4">
+                <div key={idx} className="prose prose-sm dark:prose-invert max-w-none space-y-4 break-words overflow-wrap-anywhere">
                   <ReactMarkdown
                     components={{
-                      p: ({node, ...props}) => <p {...props} className="mb-4" />,
+                      p: ({node, ...props}) => <p {...props} className="mb-4 break-words" />,
                       ol: ({node, ...props}) => <ol {...props} style={{ listStyleType: 'decimal', paddingLeft: '1.5em' }} />,
-                      li: ({node, ...props}) => <li {...props} style={{ marginBottom: '0.25em' }} />,
+                      li: ({node, ...props}) => <li {...props} style={{ marginBottom: '0.25em' }} className="break-words" />,
+                      code: ({node, ...props}) => <code {...props} className="break-all" />,
+                      pre: ({node, ...props}) => <pre {...props} className="overflow-x-auto whitespace-pre-wrap break-words" />,
                     }}
                   >
                     {part.value}
@@ -71,12 +75,14 @@ function Message({ message }) {
           )}
         </>
       ) : (
-        <div className="prose prose-sm dark:prose-invert max-w-none space-y-4">
+        <div className="prose prose-sm dark:prose-invert max-w-none space-y-4 break-words overflow-wrap-anywhere">
           <ReactMarkdown
             components={{
-              p: ({node, ...props}) => <p {...props} className="mb-1" />,
+              p: ({node, ...props}) => <p {...props} className="mb-1 break-words" />,
               ol: ({node, ...props}) => <ol {...props} style={{ listStyleType: 'decimal', paddingLeft: '1.5em'}} />,
-              li: ({node, ...props}) => <li {...props} style={{ marginBottom: '0.25em' }} />,
+              li: ({node, ...props}) => <li {...props} style={{ marginBottom: '0.25em' }} className="break-words" />,
+              code: ({node, ...props}) => <code {...props} className="break-all" />,
+              pre: ({node, ...props}) => <pre {...props} className="overflow-x-auto whitespace-pre-wrap break-words" />,
             }}
           >
             {typeof message.content === 'string' ? message.content : ''}

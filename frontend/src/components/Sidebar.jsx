@@ -80,7 +80,7 @@ const Sidebar = ({ onClose }) => {
       </div>
 
       {/* Chat History */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-2">
+      <div className="flex-1 overflow-y-auto p-4 space-y-2 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800 hover:scrollbar-thumb-gray-500">
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-sm font-medium text-gray-400 uppercase tracking-wide">
             Recent Chats
