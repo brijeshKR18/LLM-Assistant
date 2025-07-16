@@ -35,6 +35,7 @@ const HistoryPage = () => {
 
   const handleDeleteChat = (e, chatId) => {
     e.stopPropagation();
+    e.preventDefault();
     deleteChat(chatId);
   };
 
@@ -69,7 +70,7 @@ const HistoryPage = () => {
           <div className="flex items-center space-x-4">
             <button
               onClick={() => navigate('/chat')}
-              className="p-2 hover:bg-white/50 rounded-full transition-colors"
+              className="p-2 hover:bg-white/50 rounded-full transition-colors relative z-20 cursor-pointer"
             >
               <ArrowLeftIcon className="h-6 w-6 text-gray-600" />
             </button>
@@ -84,7 +85,7 @@ const HistoryPage = () => {
           {chatHistory.length > 0 && (
             <button
               onClick={() => setShowDeleteAllConfirm(true)}
-              className="flex items-center space-x-2 px-4 py-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg transition-colors"
+              className="flex items-center space-x-2 px-4 py-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg transition-colors relative z-20 cursor-pointer"
             >
               <TrashIcon className="h-4 w-4" />
               <span>Delete All</span>
@@ -133,7 +134,7 @@ const HistoryPage = () => {
                 </p>
                 <button
                   onClick={() => navigate('/chat')}
-                  className="inline-flex items-center space-x-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl transition-colors"
+                  className="inline-flex items-center space-x-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl transition-colors relative z-20 cursor-pointer"
                 >
                   <ChatBubbleLeftIcon className="h-5 w-5" />
                   <span>Start New Chat</span>
@@ -164,12 +165,12 @@ const HistoryPage = () => {
                           animate={{ opacity: 1, scale: 1 }}
                           transition={{ delay: 0.1 + index * 0.02 }}
                           whileHover={{ scale: 1.02 }}
-                          className="group bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-200 cursor-pointer border border-gray-100"
+                          className="group bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-200 cursor-pointer border border-gray-100 relative z-10"
                           onClick={() => handleChatClick(chat.id)}
                         >
-                          <div className="p-6">
+                          <div className="p-6 relative">
                             <div className="flex items-start justify-between mb-3">
-                              <div className="flex-1 min-w-0">
+                              <div className="flex-1 min-w-0 pr-2">
                                 <h3 className="text-sm font-semibold text-gray-900 truncate">
                                   {chat.title}
                                 </h3>
@@ -179,7 +180,7 @@ const HistoryPage = () => {
                               </div>
                               <button
                                 onClick={(e) => handleDeleteChat(e, chat.id)}
-                                className="opacity-0 group-hover:opacity-100 p-1 hover:bg-red-100 hover:text-red-600 rounded-full transition-all"
+                                className="opacity-0 group-hover:opacity-100 p-2 hover:bg-red-100 hover:text-red-600 rounded-full transition-all relative z-20 flex-shrink-0 cursor-pointer"
                               >
                                 <TrashIcon className="h-4 w-4" />
                               </button>
@@ -240,13 +241,13 @@ const HistoryPage = () => {
               <div className="flex space-x-3">
                 <button
                   onClick={() => setShowDeleteAllConfirm(false)}
-                  className="flex-1 px-4 py-2 text-gray-700 border border-gray-300 hover:bg-gray-50 rounded-lg transition-colors"
+                  className="flex-1 px-4 py-2 text-gray-700 border border-gray-300 hover:bg-gray-50 rounded-lg transition-colors relative z-20 cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleDeleteAll}
-                  className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
+                  className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors relative z-20 cursor-pointer"
                 >
                   Delete All
                 </button>

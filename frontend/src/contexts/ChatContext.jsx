@@ -51,12 +51,31 @@ export const ChatProvider = ({ children }) => {
     setChatHistory(history);
   };
 
-  const saveCurrentChat = () => {
+  const saveCurrentChat = (forceUpdate = false) => {
     if (!user || currentChat.messages.length === 0) return;
+
+    // Check if the current chat was already deleted
+    const chatStillExists = chatHistory.some(chat => chat.id === currentChat.id);
+    if (!chatStillExists && currentChat.messages.length > 0) {
+      // This is a new chat, so we can save it
+    } else if (!chatStillExists) {
+      // This chat was deleted, don't save it
+      return;
+    }
+
+    const existingChat = chatHistory.find(chat => chat.id === currentChat.id);
+    
+    // Only update timestamp if:
+    // 1. It's a forced update (new message added)
+    // 2. It's a new chat (not in history yet)
+    // 3. The message count has changed (new messages added)
+    const shouldUpdateTimestamp = forceUpdate || 
+                                 !existingChat || 
+                                 (existingChat && existingChat.messages.length !== currentChat.messages.length);
 
     const updatedChat = {
       ...currentChat,
-      updatedAt: new Date().toISOString(),
+      updatedAt: shouldUpdateTimestamp ? new Date().toISOString() : currentChat.updatedAt,
       title: generateChatTitle(currentChat.messages[0]?.content || 'New Chat'),
     };
 
@@ -87,9 +106,9 @@ export const ChatProvider = ({ children }) => {
   };
 
   const startNewChat = () => {
-    // Save current chat if it has messages
+    // Save current chat if it has messages (but don't update timestamp just for switching)
     if (currentChat.messages.length > 0) {
-      saveCurrentChat();
+      saveCurrentChat(false);
     }
 
     // Start new chat
@@ -105,9 +124,10 @@ export const ChatProvider = ({ children }) => {
   };
 
   const loadChat = (chatId) => {
-    // Save current chat first
-    if (currentChat.messages.length > 0) {
-      saveCurrentChat();
+    // Save current chat first (only if it has messages and is different from the one we're loading)
+    // Don't update timestamp when just switching between chats
+    if (currentChat.messages.length > 0 && currentChat.id !== chatId) {
+      saveCurrentChat(false);
     }
 
     const chat = chatHistory.find(c => c.id === chatId);
@@ -117,18 +137,25 @@ export const ChatProvider = ({ children }) => {
   };
 
   const deleteChat = (chatId) => {
+    const isCurrentChat = currentChat.id === chatId;
+    
     const newHistory = chatHistory.filter(chat => chat.id !== chatId);
+    
+    // Update both state and localStorage
+    setChatHistory(newHistory);
     saveChatHistory(newHistory);
     
-    // If we're deleting the current chat, start a new one
-    if (currentChat.id === chatId) {
+    // If we're deleting the current chat, start a new one immediately
+    if (isCurrentChat) {
       startNewChat();
+      toast.success('Current chat deleted - started new chat');
+    } else {
+      toast.success('Chat deleted successfully');
     }
-    
-    toast.success('Chat deleted successfully');
   };
 
   const deleteAllChats = () => {
+    setChatHistory([]);
     saveChatHistory([]);
     startNewChat();
     toast.success('All chats deleted successfully');
@@ -216,16 +243,22 @@ export const ChatProvider = ({ children }) => {
     }
   };
 
-  // Auto-save current chat when messages change
+  // Auto-save current chat when messages change (but only for new messages, not when switching chats)
   useEffect(() => {
     if (currentChat.messages.length > 0) {
-      const timeoutId = setTimeout(() => {
-        saveCurrentChat();
-      }, 1000); // Auto-save after 1 second of inactivity
+      // Check if this chat exists in history and if message count increased
+      const existingChat = chatHistory.find(chat => chat.id === currentChat.id);
+      const hasNewMessages = !existingChat || (existingChat.messages.length < currentChat.messages.length);
       
-      return () => clearTimeout(timeoutId);
+      if (hasNewMessages) {
+        const timeoutId = setTimeout(() => {
+          saveCurrentChat(true); // Force update timestamp for new messages
+        }, 1000); // Auto-save after 1 second of inactivity
+        
+        return () => clearTimeout(timeoutId);
+      }
     }
-  }, [currentChat.messages]);
+  }, [currentChat.messages, currentChat.id]);
 
   const value = {
     currentChat,

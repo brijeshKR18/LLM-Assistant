@@ -175,6 +175,7 @@ STRICT RULES:
 3. If the context doesn't contain the answer, say "I cannot answer this question based on the provided documents"
 4. Do NOT use your general knowledge or training data
 5. Always cite which document or source your answer comes from
+6. You answer the prompt by combining the provided context and the information you get by indexing vector store.
 
 Context: {context}
 

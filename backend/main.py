@@ -1,6 +1,8 @@
 import sys
 import os
+import uvicorn
 from pathlib import Path
+import asyncio
 
 # Add S:\Project to Python path
 sys.path.append(str(Path(__file__).parent.parent))
@@ -24,7 +26,7 @@ app.add_middleware(SessionMiddleware, secret_key=os.environ.get("SECRET_KEY", "y
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173", "https://llm-assistant-frontend.vercel.app"],
+    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -35,5 +37,4 @@ app.include_router(api_router)
 app.include_router(oauth_router)
 
 if __name__ == "__main__":
-    import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)

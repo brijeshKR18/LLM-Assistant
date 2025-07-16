@@ -24,7 +24,18 @@ function App() {
   return (
     <AuthProvider>
       <Router>
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 relative">
+          {/* Subtle background pattern */}
+          <div className="absolute inset-0 opacity-[0.02]">
+            <div 
+              className="absolute inset-0" 
+              style={{
+                backgroundImage: `radial-gradient(circle at 2px 2px, rgba(99, 102, 241, 0.8) 1px, transparent 0)`,
+                backgroundSize: '40px 40px'
+              }}
+            />
+          </div>
+          
           <Routes>
             <Route path="/login" element={<LoginPage />} />
             <Route
@@ -63,8 +74,24 @@ function App() {
             toastOptions={{
               duration: 4000,
               style: {
-                background: '#363636',
+                background: 'rgba(17, 24, 39, 0.95)',
                 color: '#fff',
+                backdropFilter: 'blur(16px)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                borderRadius: '0.75rem',
+                boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
+              },
+              success: {
+                style: {
+                  background: 'rgba(16, 185, 129, 0.95)',
+                  color: '#fff',
+                },
+              },
+              error: {
+                style: {
+                  background: 'rgba(239, 68, 68, 0.95)',
+                  color: '#fff',
+                },
               },
             }}
           />

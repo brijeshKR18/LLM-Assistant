@@ -29,13 +29,27 @@ const LoginPage = () => {
 
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center relative p-4">
-      {/* Subtle Background Pattern */}
-      <div className="absolute inset-0 opacity-5">
-        <div className="absolute inset-0" style={{
-          backgroundImage: `radial-gradient(circle at 1px 1px, rgba(99, 102, 241, 0.15) 1px, transparent 0)`,
-          backgroundSize: '30px 30px'
-        }}></div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 flex items-center justify-center relative p-4 overflow-hidden">
+      {/* Enhanced Background Elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        {/* Gradient Orbs */}
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-r from-violet-500/20 to-purple-500/20 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
+        <div className="absolute top-1/2 right-1/3 w-64 h-64 bg-gradient-to-r from-pink-500/15 to-rose-500/15 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '4s' }}></div>
+        
+        {/* Geometric Pattern */}
+        <div className="absolute inset-0 opacity-[0.03]">
+          <div 
+            className="absolute inset-0" 
+            style={{
+              backgroundImage: `
+                linear-gradient(90deg, transparent 79px, rgba(99, 102, 241, 0.3) 81px, rgba(99, 102, 241, 0.3) 82px, transparent 84px),
+                linear-gradient(0deg, transparent 79px, rgba(99, 102, 241, 0.3) 81px, rgba(99, 102, 241, 0.3) 82px, transparent 84px)
+              `,
+              backgroundSize: '80px 80px'
+            }}
+          />
+        </div>
       </div>
       
       {/* Main Content */}
@@ -44,28 +58,33 @@ const LoginPage = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: isAnimating ? 1 : 0, y: isAnimating ? 0 : 20 }}
-          transition={{ duration: 0.8 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
           className="w-full"
         >
-          <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/50 p-10 relative overflow-hidden">
-            {/* Card Accent */}
-            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 via-blue-500 to-purple-500"></div>
+          <div className="glass-card rounded-3xl shadow-2xl border border-white/30 p-12 relative overflow-hidden">
+            {/* Accent Line */}
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-violet-500 via-purple-500 to-pink-500"></div>
             
-            <div className="text-center mb-10">
+            {/* Floating Elements */}
+            <div className="absolute top-6 right-6 w-16 h-16 bg-gradient-to-br from-violet-500/10 to-purple-500/10 rounded-2xl blur-xl"></div>
+            <div className="absolute bottom-6 left-6 w-12 h-12 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 rounded-xl blur-lg"></div>
+            
+            <div className="text-center mb-12 relative">
               <motion.div
-                initial={{ opacity: 0, scale: 0.5 }}
-                animate={{ opacity: isAnimating ? 1 : 0, scale: isAnimating ? 1 : 0.5 }}
-                transition={{ duration: 0.6, delay: 0.2 }}
-                className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl mb-8 shadow-lg"
+                initial={{ opacity: 0, scale: 0.5, rotate: -180 }}
+                animate={{ opacity: isAnimating ? 1 : 0, scale: isAnimating ? 1 : 0.5, rotate: isAnimating ? 0 : -180 }}
+                transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+                className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-violet-600 via-purple-600 to-blue-600 rounded-3xl mb-8 shadow-2xl relative"
               >
-                <SparklesIcon className="h-10 w-10 text-white" />
+                <div className="absolute inset-0 bg-gradient-to-br from-violet-600 via-purple-600 to-blue-600 rounded-3xl blur-xl opacity-50"></div>
+                <SparklesIcon className="h-12 w-12 text-white relative z-10" />
               </motion.div>
               
               <motion.h1
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: isAnimating ? 1 : 0, y: isAnimating ? 0 : 20 }}
-                transition={{ duration: 0.6, delay: 0.3 }}
-                className="text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-3"
+                transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
+                className="text-4xl font-bold bg-gradient-to-r from-gray-900 via-gray-800 to-gray-700 bg-clip-text text-transparent mb-3"
               >
                 Welcome to Kuberox
               </motion.h1>
@@ -73,8 +92,8 @@ const LoginPage = () => {
               <motion.h2
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: isAnimating ? 1 : 0, y: isAnimating ? 0 : 20 }}
-                transition={{ duration: 0.6, delay: 0.4 }}
-                className="text-xl font-semibold text-indigo-600 mb-4"
+                transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
+                className="text-xl font-semibold gradient-text mb-4"
               >
                 LLM Assistant
               </motion.h2>
@@ -82,17 +101,17 @@ const LoginPage = () => {
               <motion.p
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: isAnimating ? 1 : 0, y: isAnimating ? 0 : 20 }}
-                transition={{ duration: 0.6, delay: 0.5 }}
-                className="text-gray-600 text-lg leading-relaxed"
+                transition={{ duration: 0.8, delay: 0.5, ease: "easeOut" }}
+                className="text-gray-600 text-lg leading-relaxed font-medium"
               >
-                Sign in to access your AI assistant
+                Your intelligent companion for enhanced productivity
               </motion.p>
             </div>
 
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: isAnimating ? 1 : 0, y: isAnimating ? 0 : 30 }}
-              transition={{ duration: 0.6, delay: 0.6 }}
+              transition={{ duration: 0.8, delay: 0.6, ease: "easeOut" }}
               className="space-y-6"
             >
               <GoogleSignInButton />

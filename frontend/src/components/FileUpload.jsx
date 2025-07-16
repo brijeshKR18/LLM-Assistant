@@ -25,17 +25,20 @@ function FileUpload({ onFileUpload }) {
 
   return (
     <motion.label
-      whileHover={{ scale: 1.05 }}
+      whileHover={{ scale: 1.05, y: -1 }}
       whileTap={{ scale: 0.95 }}
-      className="inline-flex items-center p-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full shadow-sm transition-colors cursor-pointer"
+      className="inline-flex items-center p-4 glass-card border border-white/30 hover:border-violet-300 text-gray-700 hover:text-violet-700 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-200 cursor-pointer group relative overflow-hidden"
     >
+      {/* Hover effect overlay */}
+      <div className="absolute inset-0 bg-gradient-to-r from-violet-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
+      
       <input
         type="file"
         className="hidden"
         onChange={handleFileChange}
         accept={allowedExtensions.join(",")}
       />
-      <PaperClipIcon className="h-5 w-5" />
+      <PaperClipIcon className="h-6 w-6 relative z-10 transition-transform duration-200 group-hover:rotate-12" />
     </motion.label>
   );
 }

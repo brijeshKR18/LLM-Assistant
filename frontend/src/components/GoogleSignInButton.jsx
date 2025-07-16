@@ -12,19 +12,26 @@ const GoogleSignInButton = () => {
 
   return (
     <motion.button
-      whileHover={{ scale: 1.02 }}
+      whileHover={{ scale: 1.02, y: -1 }}
       whileTap={{ scale: 0.98 }}
       onClick={handleGoogleSignIn}
       disabled={isLoading}
-      className="w-full flex justify-center items-center px-4 py-3 border border-gray-300 rounded-xl shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+      className="w-full flex justify-center items-center px-6 py-4 glass-card rounded-2xl shadow-lg hover:shadow-xl text-sm font-semibold text-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-violet-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 relative overflow-hidden group"
     >
+      {/* Hover effect overlay */}
+      <div className="absolute inset-0 bg-gradient-to-r from-violet-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+      
       {isLoading ? (
-        <div className="flex items-center space-x-2">
-          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600"></div>
-          <span>Redirecting...</span>
+        <div className="flex items-center space-x-3 relative z-10">
+          <div className="loading-dots">
+            <div className="bg-violet-600"></div>
+            <div className="bg-purple-600"></div>
+            <div className="bg-blue-600"></div>
+          </div>
+          <span>Connecting...</span>
         </div>
       ) : (
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-3 relative z-10">
           <svg className="w-5 h-5" viewBox="0 0 24 24">
             <path
               fill="#4285F4"
