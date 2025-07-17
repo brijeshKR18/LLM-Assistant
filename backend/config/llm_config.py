@@ -4,21 +4,40 @@
 LLM_CONFIGS = {
     "mistral:instruct": {
         "temperature": 0.2,  # Lower for more focused responses
-        "top_k": 30,         # Reduced for better quality
+        "top_k": 20,         # Reduced for better speed (was 30)
         "top_p": 0.8,        # Slightly lower for more precision
-        "num_ctx": 8192,     # Increased context window
+        "num_ctx": 4096,     # Reduced context window for speed (was 8192)
         "repeat_penalty": 1.1,
-        "num_predict": 512,  # Max response length
+        "num_predict": 256,  # Reduced max response length for speed (was 512)
         "stop": ["</s>", "[INST]", "[/INST]"]
     },
     "llama3.1:8b": {
         "temperature": 0.1,
-        "top_k": 25,
+        "top_k": 15,         # Reduced for better speed (was 25)
         "top_p": 0.85,
-        "num_ctx": 16384,    # Llama3.1 supports larger context
+        "num_ctx": 8192,     # Reduced from 16384 for speed
         "repeat_penalty": 1.05,
-        "num_predict": 1024,
+        "num_predict": 512,  # Reduced from 1024 for speed
         "stop": ["<|eot_id|>", "<|end_of_text|>"]
+    },
+    # Fast model alternatives
+    "phi3:mini": {
+        "temperature": 0.2,
+        "top_k": 15,
+        "top_p": 0.9,
+        "num_ctx": 4096,
+        "repeat_penalty": 1.1,
+        "num_predict": 256,
+        "stop": ["<|end|>"]
+    },
+    "gemma2:2b": {
+        "temperature": 0.2,
+        "top_k": 15,
+        "top_p": 0.9,
+        "num_ctx": 8192,
+        "repeat_penalty": 1.05,
+        "num_predict": 256,
+        "stop": ["<end_of_turn>"]
     }
 }
 

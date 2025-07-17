@@ -26,6 +26,7 @@ export const ChatProvider = ({ children }) => {
   const [chatHistory, setChatHistory] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedModel, setSelectedModel] = useState('mistral:instruct');
+  const [useHybridSearch, setUseHybridSearch] = useState(true); // Enable hybrid search by default
   const abortControllersRef = useRef(null);
 
   // Load chat history when user changes
@@ -145,6 +146,15 @@ export const ChatProvider = ({ children }) => {
     setChatHistory(newHistory);
     saveChatHistory(newHistory);
     
+    // Clean up backend session
+    axios.delete(`http://localhost:8000/sessions/${chatId}`)
+      .then(() => {
+        console.log(`Backend session ${chatId} cleaned up successfully`);
+      })
+      .catch((error) => {
+        console.warn(`Failed to clean up backend session ${chatId}:`, error);
+      });
+    
     // If we're deleting the current chat, start a new one immediately
     if (isCurrentChat) {
       startNewChat();
@@ -155,8 +165,20 @@ export const ChatProvider = ({ children }) => {
   };
 
   const deleteAllChats = () => {
+    const chatIds = chatHistory.map(chat => chat.id);
+    
     setChatHistory([]);
     saveChatHistory([]);
+    
+    // Clean up all backend sessions
+    axios.delete('http://localhost:8000/sessions')
+      .then(() => {
+        console.log('All backend sessions cleaned up successfully');
+      })
+      .catch((error) => {
+        console.warn('Failed to clean up backend sessions:', error);
+      });
+    
     startNewChat();
     toast.success('All chats deleted successfully');
   };
@@ -181,19 +203,31 @@ export const ChatProvider = ({ children }) => {
     abortControllersRef.current = new AbortController();
 
     try {
-      const payload = { query, model };
+      const payload = { 
+        query, 
+        model,
+        chat_id: currentChat.id,  // Send chat ID for session isolation
+        conversation_history: updatedMessages,  // Send conversation history
+        use_web_search: useHybridSearch,  // Enable/disable web search
+        trusted_sites_only: true  // Use only trusted Red Hat sites
+      };
       if (filename) {
         payload.filename = filename;
       }
       
-      const response = await axios.post('http://localhost:8000/query', payload, {
+      // Use hybrid-query endpoint for better results
+      const endpoint = useHybridSearch ? 'http://localhost:8000/hybrid-query' : 'http://localhost:8000/query';
+      const response = await axios.post(endpoint, payload, {
         signal: abortControllersRef.current.signal,
       });
       
       const assistantMessage = {
         role: 'assistant',
-        content: response.data.answer,
+        content: response.data.response || response.data.answer, // hybrid-query uses 'response', query uses 'answer'
         sources: response.data.sources || [],
+        searchType: response.data.search_type || 'local',
+        hasLocalKnowledge: response.data.has_local_knowledge,
+        hasWebKnowledge: response.data.has_web_knowledge,
         timestamp: new Date().toISOString(),
       };
       
@@ -266,6 +300,8 @@ export const ChatProvider = ({ children }) => {
     isLoading,
     selectedModel,
     setSelectedModel,
+    useHybridSearch,
+    setUseHybridSearch,
     sendMessage,
     cancelRequest,
     startNewChat,

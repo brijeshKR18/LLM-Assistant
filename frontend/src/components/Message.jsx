@@ -17,6 +17,97 @@ function Message({ message }) {
     }
   };
 
+  // Enhanced formatting for step-by-step content
+  const formatStepByStepContent = (content) => {
+    // Check if content contains step patterns
+    const stepPatterns = [
+      /^\d+\.\s/gm,  // "1. Step text"
+      /^Step \d+:/gm, // "Step 1: Do something"
+      /^•\s/gm,      // "• Bullet point"
+    ];
+    
+    const hasSteps = stepPatterns.some(pattern => pattern.test(content));
+    
+    // Function to render text with bold formatting
+    const renderTextWithBold = (text) => {
+      // Handle **bold** and __bold__ markdown syntax
+      const parts = text.split(/(\*\*[^*]+\*\*|__[^_]+__)/g);
+      
+      return parts.map((part, idx) => {
+        if (part.match(/^\*\*(.+)\*\*$/)) {
+          const boldText = part.replace(/^\*\*|\*\*$/g, '');
+          return (
+            <strong key={idx}>
+              {boldText}
+            </strong>
+          );
+        } else if (part.match(/^__(.+)__$/)) {
+          const boldText = part.replace(/^__|\__$/g, '');
+          return (
+            <strong key={idx}>
+              {boldText}
+            </strong>
+          );
+        }
+        return part;
+      });
+    };
+    
+    if (hasSteps) {
+      return content.split('\n').map((line, index) => {
+        // Check for numbered steps
+        const numberedMatch = line.match(/^(\d+)\.\s(.+)/);
+        if (numberedMatch) {
+          return (
+            <div key={index} className="flex items-start mb-4 p-3 bg-blue-50 rounded-lg border-l-4 border-blue-500">
+              <span className="flex-shrink-0 w-6 h-6 bg-blue-500 text-white text-sm font-bold rounded-full flex items-center justify-center mr-3">
+                {numberedMatch[1]}
+              </span>
+              <span className="text-gray-800 font-medium">{renderTextWithBold(numberedMatch[2])}</span>
+            </div>
+          );
+        }
+        
+        // Check for "Step X:" format
+        const stepMatch = line.match(/^Step (\d+):\s*(.+)/);
+        if (stepMatch) {
+          return (
+            <div key={index} className="flex items-start mb-4 p-3 bg-green-50 rounded-lg border-l-4 border-green-500">
+              <span className="flex-shrink-0 px-2 py-1 bg-green-500 text-white text-sm font-bold rounded mr-3">
+                Step {stepMatch[1]}
+              </span>
+              <span className="text-gray-800 font-medium">{renderTextWithBold(stepMatch[2])}</span>
+            </div>
+          );
+        }
+        
+        // Check for bullet points
+        const bulletMatch = line.match(/^•\s(.+)/);
+        if (bulletMatch) {
+          return (
+            <div key={index} className="flex items-start mb-2 pl-4">
+              <span className="flex-shrink-0 w-2 h-2 bg-blue-500 rounded-full mr-3 mt-2"></span>
+              <span className="text-gray-800 font-medium">{renderTextWithBold(bulletMatch[1])}</span>
+            </div>
+          );
+        }
+        
+        // Regular line
+        if (line.trim()) {
+          return (
+            <p key={index} className="mb-2 text-gray-800 font-medium">
+              {renderTextWithBold(line)}
+            </p>
+          );
+        }
+        
+        return null;
+      }).filter(Boolean);
+    }
+    
+    return null;
+  };
+
   if (message.role === 'system') {
     return (
       <div className="text-center text-gray-500 font-medium">
@@ -46,7 +137,18 @@ function Message({ message }) {
     if (match.index > lastIndex) {
       parts.push({ type: 'text', value: content.slice(lastIndex, match.index) });
     }
-    parts.push({ type: 'code', value: match[1] });
+    
+    // Clean up code block - remove language identifier from first line
+    let codeContent = match[1];
+    const lines = codeContent.split('\n');
+    
+    // Check if first line is a language identifier (common ones: bash, yaml, javascript, python, etc.)
+    if (lines.length > 1 && lines[0].trim().match(/^(bash|yaml|yml|javascript|js|python|py|java|cpp|c|html|css|sql|json|xml|sh|shell|powershell|ps1|typescript|ts|go|rust|php|ruby|perl|scala|kotlin|swift|dart|r|matlab|octave|lua|vim|dockerfile|makefile|cmake|nginx|apache|config|conf|ini|properties|toml)$/i)) {
+      // Remove the language identifier line
+      codeContent = lines.slice(1).join('\n');
+    }
+    
+    parts.push({ type: 'code', value: codeContent });
     lastIndex = regex.lastIndex;
   }
   if (lastIndex < content.length) {
@@ -57,6 +159,27 @@ function Message({ message }) {
     <div className={`min-w-0 overflow-hidden ${message.role === 'user' ? 'user-message' : 'assistant-message'}`}>
       {message.role === 'assistant' && !message.error ? (
         <>
+          {/* Copy entire message button */}
+          <div className="flex justify-end mb-2">
+            <button
+              onClick={() => copyToClipboard(message.content, 'full-message')}
+              className="flex items-center space-x-1 px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors cursor-pointer text-xs text-gray-600 hover:text-gray-800 border border-gray-200"
+              title="Copy entire message"
+            >
+              {copiedStates['full-message'] ? (
+                <>
+                  <Check className="w-3 h-3 text-green-600" />
+                  <span className="text-green-600">Copied</span>
+                </>
+              ) : (
+                <>
+                  <Copy className="w-3 h-3" />
+                  <span>Copy Message</span>
+                </>
+              )}
+            </button>
+          </div>
+          
           <div>
             {parts.map((part, idx) =>
               part.type === 'code' ? (
@@ -112,32 +235,72 @@ function Message({ message }) {
                 </div>
               ) : (
                 <div key={idx} className="prose prose-gray dark:prose-invert max-w-none leading-relaxed break-words overflow-wrap-anywhere">
-                  <ReactMarkdown
-                    components={{
-                      p: ({ node, ...props }) => (
-                        <p 
-                          {...props} 
-                          className="mb-4 break-words leading-relaxed text-gray-800 font-medium" 
-                        />
-                      ),
+                  {(() => {
+                    // Try special step-by-step formatting first
+                    const stepFormatted = formatStepByStepContent(part.value);
+                    if (stepFormatted) {
+                      return <div className="space-y-2">{stepFormatted}</div>;
+                    }
+                    
+                    // Fall back to ReactMarkdown for regular content
+                    return (
+                      <ReactMarkdown
+                        components={{
+                          p: ({ node, ...props }) => (
+                            <p 
+                              {...props} 
+                              className="mb-4 break-words leading-relaxed text-gray-800 font-medium text-base" 
+                            />
+                          ),
                       ol: ({ node, ...props }) => (
                         <ol 
                           {...props} 
-                          className="list-decimal list-inside space-y-2 ml-4 text-gray-800 font-medium" 
+                          className="list-none space-y-3 ml-0 text-gray-800 font-medium mb-6" 
                         />
                       ),
                       ul: ({ node, ...props }) => (
                         <ul 
                           {...props} 
-                          className="list-disc list-inside space-y-2 ml-4 text-gray-800 font-medium" 
+                          className="space-y-2 ml-0 text-gray-800 font-medium mb-6" 
                         />
                       ),
-                      li: ({ node, ...props }) => (
-                        <li 
-                          {...props} 
-                          className="break-words leading-relaxed text-gray-800 font-medium mb-1" 
-                        />
-                      ),
+                      li: ({ node, ...props }) => {
+                        const parent = node?.parent;
+                        const isOrderedList = parent?.tagName === 'ol';
+                        
+                        if (isOrderedList) {
+                          // Get the index of this li element
+                          const index = Array.from(parent.children).indexOf(node) + 1;
+                          
+                          return (
+                            <li 
+                              {...props} 
+                              className="break-words leading-relaxed text-gray-800 font-medium mb-3 pl-8 relative"
+                            >
+                              <span 
+                                className="absolute left-0 top-0 w-6 h-6 bg-blue-500 text-white text-sm font-bold rounded-full flex items-center justify-center"
+                              >
+                                {index}
+                              </span>
+                              <div className="ml-0">
+                                {props.children}
+                              </div>
+                            </li>
+                          );
+                        } else {
+                          return (
+                            <li 
+                              {...props} 
+                              className="break-words leading-relaxed text-gray-800 font-medium mb-2 pl-6 relative"
+                            >
+                              <span className="absolute left-0 top-2 w-2 h-2 bg-blue-500 rounded-full"></span>
+                              <div className="ml-0">
+                                {props.children}
+                              </div>
+                            </li>
+                          );
+                        }
+                      },
                       code: ({ node, ...props }) => (
                         <code 
                           {...props} 
@@ -179,37 +342,107 @@ function Message({ message }) {
                       h1: ({ node, ...props }) => (
                         <h1 
                           {...props} 
-                          className="text-2xl font-bold text-gray-900 mb-4 mt-6" 
+                          className="text-2xl font-bold text-gray-900 mb-6 mt-8 pb-2 border-b-2 border-blue-200" 
                         />
                       ),
                       h2: ({ node, ...props }) => (
                         <h2 
                           {...props} 
-                          className="text-xl font-bold text-gray-900 mb-3 mt-5" 
-                        />
+                          className="text-xl font-bold text-gray-900 mb-4 mt-6 flex items-center" 
+                        >
+                          <span className="w-1 h-6 bg-blue-500 mr-3 rounded"></span>
+                          {props.children}
+                        </h2>
                       ),
                       h3: ({ node, ...props }) => (
                         <h3 
                           {...props} 
-                          className="text-lg font-bold text-gray-900 mb-2 mt-4" 
+                          className="text-lg font-bold text-blue-700 mb-3 mt-5" 
+                        />
+                      ),
+                      h4: ({ node, ...props }) => (
+                        <h4 
+                          {...props} 
+                          className="text-base font-bold text-gray-800 mb-2 mt-4" 
+                        />
+                      ),
+                      h5: ({ node, ...props }) => (
+                        <h5 
+                          {...props} 
+                          className="text-sm font-bold text-gray-700 mb-2 mt-3 uppercase tracking-wide" 
+                        />
+                      ),
+                      h6: ({ node, ...props }) => (
+                        <h6 
+                          {...props} 
+                          className="text-sm font-semibold text-gray-600 mb-2 mt-3" 
                         />
                       ),
                       blockquote: ({ node, ...props }) => (
                         <blockquote 
                           {...props} 
-                          className="border-l-4 border-violet-500 bg-violet-50 pl-4 py-2 my-4 italic text-gray-700 font-medium" 
-                        />
+                          className="border-l-4 border-blue-500 bg-blue-50 pl-6 py-4 my-6 italic text-gray-700 font-medium rounded-r-lg" 
+                        >
+                          <div className="flex items-start">
+                            <span className="text-blue-500 text-2xl mr-3 mt-1">"</span>
+                            <div>{props.children}</div>
+                          </div>
+                        </blockquote>
                       ),
                       strong: ({ node, ...props }) => (
                         <strong 
                           {...props} 
-                          className="font-bold text-gray-900" 
+                        />
+                      ),
+                      b: ({ node, ...props }) => (
+                        <strong 
+                          {...props} 
+                        />
+                      ),
+                      em: ({ node, ...props }) => (
+                        <em 
+                          {...props} 
+                          className="italic text-blue-700 font-medium bg-blue-25 px-1 rounded" 
+                        />
+                      ),
+                      hr: ({ node, ...props }) => (
+                        <hr 
+                          {...props} 
+                          className="my-8 border-0 h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent" 
+                        />
+                      ),
+                      table: ({ node, ...props }) => (
+                        <div className="overflow-x-auto my-6">
+                          <table 
+                            {...props} 
+                            className="min-w-full border border-gray-200 rounded-lg overflow-hidden" 
+                          />
+                        </div>
+                      ),
+                      thead: ({ node, ...props }) => (
+                        <thead 
+                          {...props} 
+                          className="bg-gray-50" 
+                        />
+                      ),
+                      th: ({ node, ...props }) => (
+                        <th 
+                          {...props} 
+                          className="px-4 py-3 text-left text-xs font-semibold text-gray-900 uppercase tracking-wider border-b border-gray-200" 
+                        />
+                      ),
+                      td: ({ node, ...props }) => (
+                        <td 
+                          {...props} 
+                          className="px-4 py-3 text-sm text-gray-800 border-b border-gray-100" 
                         />
                       ),
                     }}
                   >
                     {part.value}
                   </ReactMarkdown>
+                    );
+                  })()}
                 </div>
               )
             )}
@@ -220,18 +453,98 @@ function Message({ message }) {
                 <div className="w-2 h-2 bg-violet-500 rounded-full"></div>
                 <span className="text-xs font-bold text-violet-700 uppercase tracking-wider">Sources</span>
               </div>
-              <div className="text-sm text-violet-800 font-medium">
-                {message.sources.map((src, index) => (
-                  <span key={index} className="inline-block bg-white px-2 py-1 rounded-lg border border-violet-200 mr-2 mb-1">
-                    {src.filename || src.resource}
-                  </span>
-                ))}
+              <div className="text-sm text-violet-800 font-medium space-y-2">
+                {/* Categorize sources */}
+                {(() => {
+                  const localSources = message.sources.filter(src => 
+                    src.type === 'local' || src.filename || src.source || (src.resource && !src.resource.startsWith('http'))
+                  );
+                  const webSources = message.sources.filter(src => 
+                    src.type === 'web' || (src.resource && src.resource.startsWith('http'))
+                  );
+                  
+                  return (
+                    <>
+                      {/* Local Document Sources */}
+                      {localSources.length > 0 && (
+                        <div>
+                          <div className="flex items-center space-x-1 mb-1">
+                            <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
+                            <span className="text-xs font-semibold text-blue-700 uppercase tracking-wide">Local Documents</span>
+                          </div>
+                          <div className="flex flex-wrap gap-1">
+                            {localSources.map((src, index) => {
+                              // Extract filename from any path format
+                              let displayName = src.filename || src.source || src.resource || 'Unknown';
+                              
+                              // If it still contains path separators, extract just the filename
+                              if (displayName.includes('/') || displayName.includes('\\')) {
+                                displayName = displayName.split('/').pop().split('\\').pop();
+                              }
+                              
+                              return (
+                                <span key={`local-${index}`} className="inline-block bg-blue-50 text-blue-800 px-2 py-1 rounded-lg border border-blue-200 text-xs">
+                                  {displayName}
+                                </span>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* Web Sources */}
+                      {webSources.length > 0 && (
+                        <div>
+                          <div className="flex items-center space-x-1 mb-1">
+                            <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
+                            <span className="text-xs font-semibold text-green-700 uppercase tracking-wide">Red Hat Documentation</span>
+                          </div>
+                          <div className="flex flex-wrap gap-1">
+                            {webSources.map((src, index) => (
+                              <a 
+                                key={`web-${index}`} 
+                                href={src.resource} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="inline-block bg-green-50 text-green-800 px-2 py-1 rounded-lg border border-green-200 text-xs hover:bg-green-100 transition-colors duration-200"
+                              >
+                                {src.title || src.doc_type || new URL(src.resource).hostname}
+                              </a>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  );
+                })()}
               </div>
             </div>
           )}
         </>
       ) : (
-        <div className="leading-relaxed break-words overflow-wrap-anywhere">
+        <>
+          {/* Copy entire message button for user messages */}
+          <div className="flex justify-end mb-2">
+            <button
+              onClick={() => copyToClipboard(message.content, 'user-full-message')}
+              className="flex items-center space-x-1 px-3 py-1 bg-white/10 hover:bg-white/20 rounded-lg transition-colors cursor-pointer text-xs text-white/80 hover:text-white border border-white/20"
+              title="Copy entire message"
+            >
+              {copiedStates['user-full-message'] ? (
+                <>
+                  <Check className="w-3 h-3 text-green-300" />
+                  <span className="text-green-300">Copied</span>
+                </>
+              ) : (
+                <>
+                  <Copy className="w-3 h-3" />
+                  <span>Copy Message</span>
+                </>
+              )}
+            </button>
+          </div>
+          
+          <div className="leading-relaxed break-words overflow-wrap-anywhere">
           <ReactMarkdown
             components={{
               p: ({ node, ...props }) => (
@@ -299,14 +612,19 @@ function Message({ message }) {
               strong: ({ node, ...props }) => (
                 <strong 
                   {...props} 
-                  className="font-bold text-white" 
+                />
+              ),
+              b: ({ node, ...props }) => (
+                <strong 
+                  {...props} 
                 />
               ),
             }}
           >
             {typeof message.content === 'string' ? message.content : ''}
           </ReactMarkdown>
-        </div>
+          </div>
+        </>
       )}
     </div>
   );

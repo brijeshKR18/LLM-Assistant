@@ -12,7 +12,7 @@ import {
 } from '@heroicons/react/24/outline';
 
 function ChatInput() {
-  const { sendMessage, cancelRequest, isLoading, selectedModel, setSelectedModel } = useChat();
+  const { sendMessage, cancelRequest, isLoading, selectedModel, setSelectedModel, useHybridSearch, setUseHybridSearch } = useChat();
   const [input, setInput] = useState('');
   const [uploadedFile, setUploadedFile] = useState(null);
   const [uploadedFileName, setUploadedFileName] = useState(null);
@@ -83,14 +83,23 @@ function ChatInput() {
             </div>
           </div>
           <motion.button
-            whileHover={{ scale: 1.1, backgroundColor: "rgba(239, 68, 68, 0.1)" }}
-            whileTap={{ scale: 0.9 }}
+            whileHover={{ scale: isLoading ? 1 : 1.1, backgroundColor: isLoading ? "transparent" : "rgba(239, 68, 68, 0.1)" }}
+            whileTap={{ scale: isLoading ? 1 : 0.9 }}
             type="button"
             onClick={handleDeleteFile}
-            className="p-2 hover:bg-red-50 rounded-xl transition-all duration-200"
+            disabled={isLoading}
+            className={`p-2 rounded-xl transition-all duration-200 ${
+              isLoading 
+                ? 'opacity-50 cursor-not-allowed' 
+                : 'hover:bg-red-50'
+            }`}
             aria-label="Remove file"
           >
-            <XMarkIcon className="h-5 w-5 text-gray-600 hover:text-red-600" />
+            <XMarkIcon className={`h-5 w-5 transition-colors duration-200 ${
+              isLoading 
+                ? 'text-gray-400' 
+                : 'text-gray-600 hover:text-red-600'
+            }`} />
           </motion.button>
         </motion.div>
       )}
@@ -137,17 +146,58 @@ function ChatInput() {
           <div className="flex items-center gap-3 flex-shrink-0">
             {/* File Upload */}
             {!uploadedFile && (
-              <div className="relative z-50">
-                <FileUpload onFileUpload={handleFileChange} />
+              <div className={`relative z-50 ${isLoading ? 'opacity-50 pointer-events-none' : ''}`}>
+                <FileUpload onFileUpload={handleFileChange} disabled={isLoading} />
               </div>
             )}
 
             {/* Model Selector */}
-            <div className="relative z-50">
+            <div className={`relative z-50 ${isLoading ? 'opacity-50 pointer-events-none' : ''}`}>
               <ModelSelector 
                 value={selectedModel} 
-                onChange={handleModelChange} 
+                onChange={handleModelChange}
+                disabled={isLoading}
               />
+            </div>
+
+            {/* Hybrid Search Toggle */}
+            <div className={`relative z-50 ${isLoading ? 'opacity-50 pointer-events-none' : ''}`}>
+              <motion.button
+                whileHover={{ scale: isLoading ? 1 : 1.05, y: isLoading ? 0 : -1 }}
+                whileTap={{ scale: isLoading ? 1 : 0.95 }}
+                onClick={() => setUseHybridSearch(!useHybridSearch)}
+                disabled={isLoading}
+                className={`p-4 glass-card border border-white/30 rounded-2xl shadow-lg transition-all duration-200 group relative overflow-hidden ${
+                  isLoading 
+                    ? 'cursor-not-allowed opacity-50' 
+                    : 'hover:border-violet-300 hover:shadow-xl cursor-pointer'
+                }`}
+                title={isLoading ? 'Search mode locked during generation' : 
+                  useHybridSearch ? 'Switch to Local Only' : 'Switch to Hybrid Search (Local + Red Hat Docs)'}
+              >
+                {/* Hover effect overlay */}
+                {!isLoading && (
+                  <div className="absolute inset-0 bg-gradient-to-r from-violet-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
+                )}
+                
+                {/* Content */}
+                <div className="relative z-10 flex items-center space-x-2">
+                  <div className={`h-3 w-3 rounded-full transition-all duration-200 ${
+                    useHybridSearch 
+                      ? 'bg-gradient-to-r from-green-500 to-emerald-500 shadow-sm' 
+                      : 'bg-gray-400'
+                  }`} />
+                  <span className={`font-medium text-xs transition-colors duration-200 ${
+                    isLoading 
+                      ? 'text-gray-400'
+                      : useHybridSearch 
+                        ? 'text-emerald-600 group-hover:text-violet-700' 
+                        : 'text-gray-600 group-hover:text-violet-700'
+                  }`}>
+                    {useHybridSearch ? 'Hybrid' : 'Local'}
+                  </span>
+                </div>
+              </motion.button>
             </div>
 
             {/* Send/Stop Button */}
