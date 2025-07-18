@@ -227,8 +227,8 @@ class HybridKnowledgeSystem:
         sources = []
         
         # Check weight configuration to determine what to include
-        local_weight = HYBRID_CONFIG.get("local_weight", 0.5)
-        web_weight = HYBRID_CONFIG.get("web_weight", 0.5)
+        local_weight = HYBRID_CONFIG.get("local_weight",0.3)
+        web_weight = HYBRID_CONFIG.get("web_weight",0.7)
         
         # Add local results only if local_weight > 0
         if local_weight > 0 and local_result["answer"]:
