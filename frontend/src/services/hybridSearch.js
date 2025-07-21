@@ -45,7 +45,7 @@ export const performHybridQuery = async (query, options = {}) => {
   const requestBody = buildHybridQueryRequest(query, options);
   
   try {
-    const response = await fetch('/api/hybrid-query', {
+    const response = await fetch('http://localhost:8000/hybrid-query', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

@@ -199,6 +199,7 @@ export const ChatProvider = ({ children }) => {
       updatedAt: new Date().toISOString(),
     }));
     
+    // Use standard non-streaming requests for all queries
     setIsLoading(true);
     abortControllersRef.current = new AbortController();
 

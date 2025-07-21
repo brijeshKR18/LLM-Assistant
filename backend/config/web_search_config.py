@@ -3,82 +3,52 @@
 # Trusted websites for different types of queries - SPECIFIC REDHAT DOCUMENTATION URLS
 TRUSTED_WEBSITES = {
     "openshift": [
-        # "https://docs.redhat.com/en/documentation/openshift_container_platform/4.16",
-        # "https://docs.redhat.com/en/documentation/openshift_container_platform/4.17",
-        # "https://docs.redhat.com/en/documentation/openshift_container_platform/4.18",
-        # "https://docs.redhat.com/en/documentation/openshift_container_platform/4.19",
         "https://docs.redhat.com/en/documentation/openshift_container_platform",
-        "https://www.google.com"
     ],
     "kubernetes": [
-        # "https://docs.redhat.com/en/documentation/openshift_container_platform/4.16",
-        # "https://docs.redhat.com/en/documentation/openshift_container_platform/4.17",
-        # "https://docs.redhat.com/en/documentation/openshift_container_platform/4.18",
-        # "https://docs.redhat.com/en/documentation/openshift_container_platform/4.19",
         "https://docs.redhat.com/en/documentation/openshift_container_platform",
-        "https://www.google.com"
     ],
     "rhel": [
-        # "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/7",
-        # "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/8",
-        # "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9",
-        # "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/10",
         "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux",
-        "https://www.google.com"
     ],
     "ansible": [
-        # "https://docs.redhat.com/en/documentation/red_hat_ansible_automation_platform/2.5",
         "https://docs.redhat.com/en/documentation/red_hat_ansible_automation_platform",
-        "https://www.google.com"
     ],
     "virtualization": [
-        # "https://docs.redhat.com/en/documentation/openshift_container_platform/4.16/html/virtualization/index",
-        # "https://docs.redhat.com/en/documentation/openshift_container_platform/4.17/html/virtualization/index",
-        # "https://docs.redhat.com/en/documentation/openshift_container_platform/4.18/html/virtualization/index",
-        # "https://docs.redhat.com/en/documentation/openshift_container_platform/4.19/html/virtualization/index",
         "https://docs.redhat.com/en/documentation/openshift_container_platform",
-        "https://www.google.com"
     ],
     "containerization": [
-        # "https://docs.redhat.com/en/documentation/openshift_container_platform/4.16",
-        # "https://docs.redhat.com/en/documentation/openshift_container_platform/4.17",
-        # "https://docs.redhat.com/en/documentation/openshift_container_platform/4.18",
-        # "https://docs.redhat.com/en/documentation/openshift_container_platform/4.19",
-        # "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/7",
-        # "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/8",
-        # "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9",
-        # "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/10",
+        "https://docs.redhat.com/en/documentation/openshift_container_platform",
         "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux",
-        "https://www.google.com"
     ],
     "configuration": [
-        # "https://docs.redhat.com/en/documentation/openshift_container_platform/4.16/html/postinstallation_configuration/index",
-        # "https://docs.redhat.com/en/documentation/openshift_container_platform/4.17/html/postinstallation_configuration/index",
-        # "https://docs.redhat.com/en/documentation/openshift_container_platform/4.18/html/postinstallation_configuration/index",
-        # "https://docs.redhat.com/en/documentation/openshift_container_platform/4.19/html/postinstallation_configuration/index",
-        # "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/7",
-        # "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/8",
-        # "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9",
-        # "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/10",
         "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux",
         "https://docs.redhat.com/en/documentation/openshift_container_platform",
-        "https://www.google.com"
     ],
     "general_tech": [
-        # "https://docs.redhat.com/en/documentation/openshift_container_platform/4.16",
-        # "https://docs.redhat.com/en/documentation/openshift_container_platform/4.17",
-        # "https://docs.redhat.com/en/documentation/openshift_container_platform/4.18",
-        # "https://docs.redhat.com/en/documentation/openshift_container_platform/4.19",
-        # "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/7",
-        # "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/8",
-        # "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9",
-        # "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/10",
-        # "https://docs.redhat.com/en/documentation/red_hat_ansible_automation_platform/2.5",
         "https://docs.redhat.com/en/documentation/red_hat_ansible_automation_platform",
         "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux",
         "https://docs.redhat.com/en/documentation/openshift_container_platform",
-        "https://www.google.com"
     ]
+}
+
+# Version-specific URLs for OpenShift documentation
+OPENSHIFT_VERSION_URLS = {
+    "4.16": "https://docs.redhat.com/en/documentation/openshift_container_platform/4.16",
+    "4.17": "https://docs.redhat.com/en/documentation/openshift_container_platform/4.17",
+    "4.18": "https://docs.redhat.com/en/documentation/openshift_container_platform/4.18",
+    "4.19": "https://docs.redhat.com/en/documentation/openshift_container_platform/4.19",
+    "4.15": "https://docs.redhat.com/en/documentation/openshift_container_platform/4.15",
+    "4.14": "https://docs.redhat.com/en/documentation/openshift_container_platform/4.14",
+    "4.13": "https://docs.redhat.com/en/documentation/openshift_container_platform/4.13",
+    "4.12": "https://docs.redhat.com/en/documentation/openshift_container_platform/4.12"
+}
+
+# Version-specific URLs for RHEL documentation
+RHEL_VERSION_URLS = {
+    "9": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9",
+    "8": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/8",
+    "7": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/7"
 }
 
 # Search query patterns to determine which websites to use - ENHANCED WITH ANSIBLE AND VIRTUALIZATION
@@ -97,7 +67,7 @@ WEB_SEARCH_CONFIG = {
     "max_results_per_site": 5,     # More results since we're only using one site
     "max_total_results": 8,        # Increased for better coverage
     "timeout": 15,                 # Longer timeout for thorough search
-    "max_content_length": 3000,    # More content since it's official docs
+    "max_content_length": 12000,    # Increased for longer content
     "enable_caching": True,
     "cache_duration": 7200,        # 2 hour cache for official docs
     "user_agent": "LLM-Assistant/1.0 (Educational Purpose - Red Hat Documentation)"
@@ -118,10 +88,10 @@ CONTENT_FILTER = {
 
 # Hybrid response configuration
 HYBRID_CONFIG = {
-    "local_weight": 0.3,      # 30% weight to local documents
-    "web_weight": 0.7,        # 70% weight to web content
+    "local_weight": 0.0,      # 30% weight to local documents
+    "web_weight": 1.0,        # 70% weight to web content
     "merge_strategy": "complement",  # "complement" or "verify" or "expand"
-    "max_hybrid_context": 16000,  # Total context limit for hybrid responses
+    "max_hybrid_context": 64000,  # Further increased context limit for full responses
     "prioritize_local": True,     # Show local results first
     "web_fallback": True         # Use web if local results insufficient
 }

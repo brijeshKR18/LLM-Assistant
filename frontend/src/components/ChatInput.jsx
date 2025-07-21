@@ -12,7 +12,15 @@ import {
 } from '@heroicons/react/24/outline';
 
 function ChatInput() {
-  const { sendMessage, cancelRequest, isLoading, selectedModel, setSelectedModel, useHybridSearch, setUseHybridSearch } = useChat();
+  const { 
+    sendMessage, 
+    cancelRequest, 
+    isLoading, 
+    selectedModel, 
+    setSelectedModel, 
+    useHybridSearch, 
+    setUseHybridSearch
+  } = useChat();
   const [input, setInput] = useState('');
   const [uploadedFile, setUploadedFile] = useState(null);
   const [uploadedFileName, setUploadedFileName] = useState(null);
@@ -146,13 +154,13 @@ function ChatInput() {
           <div className="flex items-center gap-3 flex-shrink-0">
             {/* File Upload */}
             {!uploadedFile && (
-              <div className={`relative z-50 ${isLoading ? 'opacity-50 pointer-events-none' : ''}`}>
+              <div className={`relative z-50 ${isLoading ? 'opacity-100 pointer-events-none' : ''}`}>
                 <FileUpload onFileUpload={handleFileChange} disabled={isLoading} />
               </div>
             )}
 
             {/* Model Selector */}
-            <div className={`relative z-50 ${isLoading ? 'opacity-50 pointer-events-none' : ''}`}>
+            <div className={`relative z-50 ${isLoading ? 'opacity-100 pointer-events-none' : ''}`}>
               <ModelSelector 
                 value={selectedModel} 
                 onChange={handleModelChange}
@@ -161,15 +169,15 @@ function ChatInput() {
             </div>
 
             {/* Hybrid Search Toggle */}
-            <div className={`relative z-50 ${isLoading ? 'opacity-50 pointer-events-none' : ''}`}>
+            <div className={`relative z-50 ${isLoading ? 'opacity-100 pointer-events-none' : ''}`}>
               <motion.button
                 whileHover={{ scale: isLoading ? 1 : 1.05, y: isLoading ? 0 : -1 }}
                 whileTap={{ scale: isLoading ? 1 : 0.95 }}
                 onClick={() => setUseHybridSearch(!useHybridSearch)}
                 disabled={isLoading}
                 className={`p-4 glass-card border border-white/30 rounded-2xl shadow-lg transition-all duration-200 group relative overflow-hidden ${
-                  isLoading 
-                    ? 'cursor-not-allowed opacity-50' 
+                  isLoading
+                    ? 'cursor-not-allowed' 
                     : 'hover:border-violet-300 hover:shadow-xl cursor-pointer'
                 }`}
                 title={isLoading ? 'Search mode locked during generation' : 
@@ -188,7 +196,7 @@ function ChatInput() {
                       : 'bg-gray-400'
                   }`} />
                   <span className={`font-medium text-xs transition-colors duration-200 ${
-                    isLoading 
+                    isLoading
                       ? 'text-gray-400'
                       : useHybridSearch 
                         ? 'text-emerald-600 group-hover:text-violet-700' 
@@ -218,15 +226,15 @@ function ChatInput() {
                 whileHover={{ scale: 1.05, y: -1 }}
                 whileTap={{ scale: 0.95 }}
                 type="submit"
-                disabled={!input.trim()}
+                disabled={!input.trim() || isLoading}
                 className={`p-4 rounded-2xl shadow-lg transition-all duration-200 relative overflow-hidden group ${
-                  input.trim()
+                  input.trim() && !isLoading
                     ? 'bg-gradient-to-r from-violet-600 via-purple-600 to-blue-600 hover:from-violet-700 hover:via-purple-700 hover:to-blue-700 text-white'
                     : 'bg-gray-200 text-gray-400 cursor-not-allowed'
                 }`}
                 aria-label="Send message"
               >
-                {input.trim() && (
+                {input.trim() && !isLoading && (
                   <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
                 )}
                 <PaperAirplaneIcon className="h-6 w-6 relative z-10" />

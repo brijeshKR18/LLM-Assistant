@@ -47,9 +47,9 @@ FAST_RETRIEVAL_CONFIGS = {
 
 # Text processing optimizations
 TEXT_PROCESSING_CONFIGS = {
-    "max_chunk_size": 400,      # Smaller chunks
-    "chunk_overlap": 50,        # Minimal overlap
-    "max_context_length": 3000, # Limit total context sent to LLM
+    "max_chunk_size": 800,      # Increased chunk size
+    "chunk_overlap": 100,       # Increased overlap for better context
+    "max_context_length": 16000, # Significantly increased context limit
     "strip_extra_whitespace": True,
     "remove_empty_lines": True
 }

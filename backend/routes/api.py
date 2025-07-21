@@ -1,12 +1,13 @@
 from fastapi import APIRouter, File, UploadFile, HTTPException
 from pydantic import BaseModel
-from backend.parsers.pdf_parser import parse_pdf, parse_pdf_enhanced, parse_any_file_enhanced
+import asyncio
+import json
+from backend.parsers.pdf_parser import parse_pdf, parse_any_file_enhanced
 from backend.parsers.yaml_parser import parse_yaml
 from backend.parsers.shell_parser import parse_shell_script
 from backend.parsers.html_parser import parse_html
 from backend.parsers.oc_parser import run_oc_explain, detect_and_run_oc_commands, oc_handler
 from backend.vector_store.faiss_store import create_vector_store
-from backend.vector_store.optimized_retrieval import create_optimized_vector_store
 from backend.services.web_search import HybridKnowledgeSystem
 from langchain_ollama import OllamaLLM
 from langchain.chains import RetrievalQA
@@ -35,10 +36,6 @@ FAISS_INDEX_PATH = "faiss_index"
 GREETINGS_CONFIG_PATH = "config/greetings.json"
 
 # Import optimized configurations with fallback
-# try:
-#     from backend.config.llm_config import LLM_CONFIGS
-#     from backend.config.performance_config import FAST_LLM_CONFIGS
-# except ImportError:
 try:
     from backend.config.llm_config import LLM_CONFIGS
     from backend.config.performance_config import FAST_LLM_CONFIGS
@@ -54,6 +51,7 @@ except ImportError:
             "num_predict": 256,  # Reduced for speed
         }
     }
+    
     LLM_CONFIGS = {
         "mistral:instruct": {
             "temperature": 0.2,
@@ -109,10 +107,19 @@ def is_greeting(query):
     query = query.strip().lower()
     doc = nlp(query)
     
+    # Only check for greetings in very short queries and only if they start with greeting words
     if len(doc) <= 3:  
-        for token in doc:
-            if token.lemma_ in ["hi", "hello", "hey", "yo", "hola", "greetings", "salut", "ciao", "good"]:
-                return greetings_config[0]["response"]
+        query_words = query.split()
+        if query_words:
+            first_word = query_words[0]
+            # Check if the first word is a greeting word
+            for token in doc:
+                if token.text.lower() in ["hi", "hello", "hey", "yo", "hola", "greetings", "salut", "ciao"] and token.i == 0:
+                    return greetings_config[0]["response"]
+                # Special case for "good" - only if it's followed by time words
+                if token.text.lower() == "good" and token.i == 0 and len(query_words) == 2:
+                    if query_words[1] in ["morning", "afternoon", "evening", "day"]:
+                        return greetings_config[0]["response"]
     
     # Check configured greeting patterns
     for greeting in greetings_config:
@@ -125,6 +132,8 @@ def is_greeting(query):
                 time_of_day = match.group(1) if match and match.lastindex else "day"
                 response = response.replace("{time_of_day}", time_of_day)
             return response
+    
+    return None
     
     return None
 
@@ -327,7 +336,231 @@ class QueryInput(BaseModel):
     chat_id: str = None  # Add chat session ID
     conversation_history: list = []  # Add conversation history  
     use_web_search: bool = True  # Enable/disable web search
-    trusted_sites_only: bool = True  # Limit to trusted sites  
+    trusted_sites_only: bool = True  # Limit to trusted sites
+
+@router.post("/upload")
+async def upload_file(file: UploadFile = File(...)):
+    global hybrid_system
+    
+    if not hybrid_system:
+        error_data = {
+            "type": "error",
+            "content": "Hybrid knowledge system not initialized",
+            "finished": True
+        }
+        yield f"data: {json.dumps(error_data)}\n\n"
+        return
+    
+    query = input.query.strip()
+    use_web = input.use_web_search
+    
+    logger.info({
+        "message": "Received streaming hybrid query",
+        "query": query[:100],
+        "use_web_search": use_web
+    })
+    
+    try:
+        # Handle greetings first
+        greeting_response = is_greeting(query)
+        if greeting_response:
+            yield f"data: {json.dumps({'type': 'content', 'content': greeting_response, 'finished': True})}\n\n"
+            return
+        
+        if use_web:
+            # Stream status updates during hybrid search
+            yield f"data: {json.dumps({'type': 'status', 'content': 'Initializing hybrid search...', 'finished': False})}\n\n"
+            await asyncio.sleep(0.3)
+            
+            yield f"data: {json.dumps({'type': 'status', 'content': 'Searching local knowledge base...', 'finished': False})}\n\n"
+            await asyncio.sleep(0.4)
+            
+            yield f"data: {json.dumps({'type': 'status', 'content': 'Fetching web documentation...', 'finished': False})}\n\n"
+            await asyncio.sleep(0.5)
+            
+            # Get hybrid results
+            hybrid_result = hybrid_system.hybrid_search(query)
+            
+            yield f"data: {json.dumps({'type': 'status', 'content': 'Processing information...', 'finished': False})}\n\n"
+            await asyncio.sleep(0.3)
+            
+            # Send sources information
+            sources_data = {
+                "type": "sources",
+                "sources": hybrid_result['sources'],
+                "has_local": hybrid_result['has_local'],
+                "has_web": hybrid_result['has_web'],
+                "search_type": "hybrid",
+                "finished": False
+            }
+            yield f"data: {json.dumps(sources_data)}\n\n"
+            
+            yield f"data: {json.dumps({'type': 'status', 'content': 'Generating response...', 'finished': False})}\n\n"
+            await asyncio.sleep(0.2)
+            
+            # Create enhanced prompt for hybrid context
+            hybrid_prompt = f"""You are an AI assistant with access to both local documentation and current web information from trusted sources.
+
+INSTRUCTIONS:
+1. Use both local knowledge and web information to provide comprehensive answers
+2. Prioritize information from official documentation and trusted sources
+3. If there are conflicts between sources, explain the differences
+4. Provide the most current and accurate information available
+5. Give clear, professional responses without indicating the source type in your answer
+
+FORMATTING REQUIREMENTS:
+• Use numbered lists (1., 2., 3.) for step-by-step procedures
+• Use bullet points (•) for feature lists or requirements
+• Format commands in code blocks with proper syntax highlighting
+• Use **bold** for important concepts or section headers
+• Use clear paragraph breaks between different topics
+
+CONTEXT:
+{hybrid_result['context']}
+
+QUESTION: {query}
+
+COMPREHENSIVE ANSWER:"""
+
+            # Use the existing LLM to process hybrid context
+            from backend.config.performance_config import FAST_LLM_CONFIGS
+            
+            model_config = FAST_LLM_CONFIGS.get("mistral:instruct", {})
+            
+            llm_instance = OllamaLLM(
+                model="mistral:instruct",
+                base_url="http://localhost:11434",
+                **model_config,
+                system="You are an expert AI assistant with access to both local documentation and current web information. Always format your responses professionally with numbered procedures (1., 2., 3.), bullet points (•) for lists, code blocks with triple backticks (```), and **bold** for important concepts. Structure your answers clearly with proper paragraph breaks and logical organization."
+            )
+            
+            # Stream the response with typing effect
+            response = llm_instance.invoke(hybrid_prompt)
+            
+            # Create a smooth typing effect by streaming character by character
+            # or small word groups while preserving markdown structure
+            current_content = ""
+            
+            # Split into words for smooth typing while preserving code blocks and structure
+            words = response.split()
+            
+            i = 0
+            while i < len(words):
+                word = words[i]
+                
+                # Check if we're starting a code block
+                if word.startswith('```'):
+                    # Find the end of the code block
+                    code_block = word
+                    i += 1
+                    while i < len(words) and not words[i-1].endswith('```'):
+                        code_block += " " + words[i]
+                        i += 1
+                    
+                    # Send the entire code block at once to preserve formatting
+                    current_content += " " + code_block if current_content else code_block
+                    
+                    data = {
+                        "type": "content",
+                        "content": " " + code_block if current_content != code_block else code_block,
+                        "finished": False
+                    }
+                    yield f"data: {json.dumps(data)}\n\n"
+                    await asyncio.sleep(0.3)  # Longer pause for code blocks
+                    
+                else:
+                    # Regular word - add to content and stream
+                    if current_content:
+                        current_content += " " + word
+                        content_to_send = " " + word
+                    else:
+                        current_content = word
+                        content_to_send = word
+                    
+                    data = {
+                        "type": "content", 
+                        "content": content_to_send,
+                        "finished": False
+                    }
+                    yield f"data: {json.dumps(data)}\n\n"
+                    
+                    # Vary the delay based on word length for natural typing
+                    base_delay = 0.05
+                    word_delay = len(word) * 0.01  # Longer words take slightly longer
+                    await asyncio.sleep(base_delay + word_delay)
+                    
+                    i += 1
+            
+            # Send completion signal
+            yield f"data: {json.dumps({'type': 'done', 'content': '', 'finished': True})}\n\n"
+            
+        else:
+            # Local-only search with streaming
+            yield f"data: {json.dumps({'type': 'status', 'content': 'Searching local knowledge base...', 'finished': False})}\n\n"
+            await asyncio.sleep(0.4)
+            
+            local_result = hybrid_system.get_local_results(query)
+            
+            # Structure local sources
+            local_sources = []
+            for src in local_result['sources']:
+                source_path = src.get('source', 'Unknown')
+                filename = source_path.split('/')[-1] if '/' in source_path else source_path.split('\\')[-1]
+                local_sources.append({
+                    "type": "local",
+                    "filename": filename,
+                    "resource": filename
+                })
+            
+            # Send sources
+            sources_data = {
+                "type": "sources",
+                "sources": local_sources,
+                "has_local": bool(local_result['answer']),
+                "has_web": False,
+                "search_type": "local_only",
+                "finished": False
+            }
+            yield f"data: {json.dumps(sources_data)}\n\n"
+            
+            # Stream the local response
+            if local_result['answer']:
+                # Use the same markdown-aware streaming for local responses
+                import re
+                
+                response = local_result['answer']
+                chunk_pattern = r'(\n```[\s\S]*?\n```\n?|\n\d+\.\s.*?(?=\n\d+\.|\n[^\d]|\Z)|\n•\s.*?(?=\n•|\n[^•]|\Z)|[.!?]+(?:\s+|$)|(?<=\n)\n+)'
+                parts = re.split(chunk_pattern, response, flags=re.MULTILINE)
+                
+                for part in parts:
+                    if part and part.strip():  # Skip empty parts
+                        data = {
+                            "type": "content",
+                            "content": part,
+                            "finished": False
+                        }
+                        yield f"data: {json.dumps(data)}\n\n"
+                        
+                        # Adjust delay based on content type
+                        if '```' in part:  # Code blocks - faster delivery
+                            await asyncio.sleep(0.05)
+                        elif re.match(r'\n\d+\.', part) or part.startswith('• '):  # Lists - medium delay
+                            await asyncio.sleep(0.15)
+                        else:  # Regular text - normal delay
+                            await asyncio.sleep(0.1)
+            else:
+                yield f"data: {json.dumps({'type': 'content', 'content': 'No relevant information found in local knowledge base.', 'finished': False})}\n\n"
+            
+            yield f"data: {json.dumps({'type': 'done', 'content': '', 'finished': True})}\n\n"
+            
+    except Exception as e:
+        logger.error({"message": "Streaming hybrid query failed", "error": str(e)})
+        error_data = {
+            "type": "error",
+            "content": f"Query processing failed: {str(e)}",
+            "finished": True
+        }
+        yield f"data: {json.dumps(error_data)}\n\n"
 
 @router.post("/upload")
 async def upload_file(file: UploadFile = File(...)):
@@ -386,25 +619,54 @@ async def upload_file(file: UploadFile = File(...)):
 
 @router.post("/hybrid-query")
 async def hybrid_query_llm(input: QueryInput):
-    """Handle queries using hybrid local + web knowledge."""
+    """Handle queries using hybrid local + web knowledge with standard responses."""
     global hybrid_system
     
     if not hybrid_system:
         raise HTTPException(status_code=503, detail="Hybrid knowledge system not initialized")
     
+    # Use standard responses for both web and local queries
     query = input.query.strip()
     use_web = input.use_web_search
+    conversation_history = input.conversation_history or []
     
     logger.info({
         "message": "Received hybrid query",
         "query": query[:100],
-        "use_web_search": use_web
+        "use_web_search": use_web,
+        "conversation_length": len(conversation_history)
     })
+    
+    # Handle greetings first
+    try:
+        greeting_response = is_greeting(query)
+        if greeting_response:
+            logger.info({"message": "Detected greeting in hybrid query", "query": query, "response": greeting_response})
+            return {
+                "response": greeting_response,
+                "sources": [],
+                "has_local_knowledge": False,
+                "has_web_knowledge": False,
+                "search_type": "greeting"
+            }
+    except Exception as greeting_error:
+        logger.warning({"message": "Failed to process greeting detection", "error": str(greeting_error)})
+        # Continue with normal processing if greeting detection fails
     
     try:
         if use_web:
             # Get hybrid results (local + web)
             hybrid_result = hybrid_system.hybrid_search(query)
+            
+            # Build conversation context
+            conversation_context = ""
+            if conversation_history:
+                conversation_context = "\n\nConversation History:\n"
+                for i, msg in enumerate(conversation_history[-10:]):  # Include last 10 messages for context
+                    role = msg.get('role', 'user')
+                    content = msg.get('content', '')
+                    conversation_context += f"{role.upper()}: {content}\n"
+                conversation_context += "\n"
             
             # Create enhanced prompt for hybrid context with better formatting
             hybrid_prompt = f"""You are an AI assistant with access to both local documentation and current web information from trusted sources.
@@ -415,6 +677,7 @@ INSTRUCTIONS:
 3. If there are conflicts between sources, explain the differences
 4. Provide the most current and accurate information available
 5. Give clear, professional responses without indicating the source type in your answer
+6. Use the conversation history to provide contextual and relevant responses
 
 FORMATTING REQUIREMENTS:
 • Use numbered lists (1., 2., 3.) for step-by-step procedures
@@ -428,6 +691,8 @@ FORMATTING REQUIREMENTS:
 
 CONTEXT:
 {hybrid_result['context']}
+
+{conversation_context}
 
 QUESTION: {query}
 
@@ -456,8 +721,57 @@ COMPREHENSIVE ANSWER:"""
                 "timestamp": time.time()
             }
         else:
-            # Fall back to local-only search
+            # Fall back to local-only search with conversation history support
             local_result = hybrid_system.get_local_results(query)
+            
+            # If we have conversation history, enhance the local result with context
+            if conversation_history and local_result['answer']:
+                # Build conversation context
+                conversation_context = "\n\nConversation History:\n"
+                for i, msg in enumerate(conversation_history[-10:]):
+                    role = msg.get('role', 'user')
+                    content = msg.get('content', '')
+                    conversation_context += f"{role.upper()}: {content}\n"
+                conversation_context += "\n"
+                
+                # Create a context-aware prompt for local results
+                enhanced_prompt = f"""You are an AI assistant with access to local documentation. Use the conversation history to provide contextual responses.
+
+INSTRUCTIONS:
+1. Use the provided context and conversation history to answer questions
+2. Reference previous parts of the conversation when relevant
+3. Provide clear, professional responses
+4. If the context doesn't contain sufficient information, clearly state this
+
+FORMATTING REQUIREMENTS:
+• Use numbered lists (1., 2., 3.) for step-by-step procedures
+• Use bullet points (•) for feature lists or requirements
+• Format commands in code blocks with proper syntax highlighting
+• Use **bold** for important concepts or section headers
+
+CONTEXT:
+{local_result['answer']}
+
+{conversation_context}
+
+QUESTION: {query}
+
+CONTEXTUAL ANSWER:"""
+
+                # Use the existing LLM to process with conversation context
+                from backend.config.performance_config import FAST_LLM_CONFIGS
+                model_config = FAST_LLM_CONFIGS.get("mistral:instruct", {})
+                
+                llm_instance = OllamaLLM(
+                    model="mistral:instruct",
+                    base_url="http://localhost:11434",
+                    **model_config,
+                    system="You are an expert AI assistant. Always format your responses professionally and use conversation history to provide relevant, contextual answers."
+                )
+                
+                enhanced_response = llm_instance.invoke(enhanced_prompt)
+                local_result['answer'] = enhanced_response
+            
             # Structure local sources properly
             local_sources = []
             for src in local_result['sources']:
@@ -481,6 +795,186 @@ COMPREHENSIVE ANSWER:"""
     except Exception as e:
         logger.error({"message": "Hybrid query failed", "error": str(e)})
         raise HTTPException(status_code=500, detail=f"Hybrid query processing failed: {str(e)}")
+
+# Streaming endpoint removed - using standard responses only
+# @router.post("/hybrid-query-stream") - REMOVED
+
+@router.get("/test-redhat-search")
+async def test_redhat_search():
+    """Handle queries using hybrid local + web knowledge with streaming response."""
+    global hybrid_system
+    
+    if not hybrid_system:
+        raise HTTPException(status_code=503, detail="Hybrid knowledge system not initialized")
+    
+    query = input.query.strip()
+    use_web = input.use_web_search
+    
+    logger.info({
+        "message": "Received streaming hybrid query",
+        "query": query[:100],
+        "use_web_search": use_web
+    })
+    
+    async def generate_streaming_response():
+        try:
+            # Handle greetings first
+            greeting_response = is_greeting(query)
+            if greeting_response:
+                yield f"data: {json.dumps({'type': 'content', 'content': greeting_response, 'finished': True})}\n\n"
+                return
+            
+            if use_web:
+                # Stream status updates during hybrid search
+                yield f"data: {json.dumps({'type': 'status', 'content': 'Initializing hybrid search...', 'finished': False})}\n\n"
+                await asyncio.sleep(0.3)
+                
+                yield f"data: {json.dumps({'type': 'status', 'content': 'Searching local knowledge base...', 'finished': False})}\n\n"
+                await asyncio.sleep(0.4)
+                
+                yield f"data: {json.dumps({'type': 'status', 'content': 'Fetching web documentation...', 'finished': False})}\n\n"
+                await asyncio.sleep(0.5)
+                
+                # Get hybrid results
+                hybrid_result = hybrid_system.hybrid_search(query)
+                
+                yield f"data: {json.dumps({'type': 'status', 'content': 'Processing information...', 'finished': False})}\n\n"
+                await asyncio.sleep(0.3)
+                
+                # Send sources information
+                sources_data = {
+                    "type": "sources",
+                    "sources": hybrid_result['sources'],
+                    "has_local": hybrid_result['has_local'],
+                    "has_web": hybrid_result['has_web'],
+                    "search_type": "hybrid",
+                    "finished": False
+                }
+                yield f"data: {json.dumps(sources_data)}\n\n"
+                
+                yield f"data: {json.dumps({'type': 'status', 'content': 'Generating response...', 'finished': False})}\n\n"
+                await asyncio.sleep(0.2)
+                
+                # Create enhanced prompt for hybrid context
+                hybrid_prompt = f"""You are an AI assistant with access to both local documentation and current web information from trusted sources.
+
+INSTRUCTIONS:
+1. Use both local knowledge and web information to provide comprehensive answers
+2. Prioritize information from official documentation and trusted sources
+3. If there are conflicts between sources, explain the differences
+4. Provide the most current and accurate information available
+5. Give clear, professional responses without indicating the source type in your answer
+
+FORMATTING REQUIREMENTS:
+• Use numbered lists (1., 2., 3.) for step-by-step procedures
+• Use bullet points (•) for feature lists or requirements
+• Format commands in code blocks with proper syntax highlighting
+• Use **bold** for important concepts or section headers
+• Use clear paragraph breaks between different topics
+
+CONTEXT:
+{hybrid_result['context']}
+
+QUESTION: {query}
+
+COMPREHENSIVE ANSWER:"""
+
+                # Use the existing LLM to process hybrid context
+                from backend.config.performance_config import FAST_LLM_CONFIGS
+                
+                model_config = FAST_LLM_CONFIGS.get("mistral:instruct", {})
+                
+                llm_instance = OllamaLLM(
+                    model="mistral:instruct",
+                    base_url="http://localhost:11434",
+                    **model_config,
+                    system="You are an expert AI assistant with access to both local documentation and current web information. Always format your responses professionally with numbered procedures (1., 2., 3.), bullet points (•) for lists, code blocks with triple backticks (```), and **bold** for important concepts. Structure your answers clearly with proper paragraph breaks and logical organization."
+                )
+                
+                # Stream the response
+                response = llm_instance.invoke(hybrid_prompt)
+                
+                # Stream the response in chunks
+                words = response.split()
+                chunk_size = 5  # Send 5 words at a time
+                
+                for i in range(0, len(words), chunk_size):
+                    chunk = " ".join(words[i:i + chunk_size])
+                    if i + chunk_size < len(words):
+                        chunk += " "
+                    
+                    data = {
+                        "type": "content",
+                        "content": chunk,
+                        "finished": False
+                    }
+                    yield f"data: {json.dumps(data)}\n\n"
+                    await asyncio.sleep(0.1)
+                
+                # Send completion signal
+                yield f"data: {json.dumps({'type': 'done', 'content': '', 'finished': True})}\n\n"
+                
+            else:
+                # Local-only search with streaming
+                yield f"data: {json.dumps({'type': 'status', 'content': 'Searching local knowledge base...', 'finished': False})}\n\n"
+                await asyncio.sleep(0.4)
+                
+                local_result = hybrid_system.get_local_results(query)
+                
+                # Structure local sources
+                local_sources = []
+                for src in local_result['sources']:
+                    source_path = src.get('source', 'Unknown')
+                    filename = source_path.split('/')[-1] if '/' in source_path else source_path.split('\\')[-1]
+                    local_sources.append({
+                        "type": "local",
+                        "filename": filename,
+                        "resource": filename
+                    })
+                
+                # Send sources
+                sources_data = {
+                    "type": "sources",
+                    "sources": local_sources,
+                    "has_local": bool(local_result['answer']),
+                    "has_web": False,
+                    "search_type": "local_only",
+                    "finished": False
+                }
+                yield f"data: {json.dumps(sources_data)}\n\n"
+                
+                # Stream the local response
+                if local_result['answer']:
+                    words = local_result['answer'].split()
+                    chunk_size = 5
+                    
+                    for i in range(0, len(words), chunk_size):
+                        chunk = " ".join(words[i:i + chunk_size])
+                        if i + chunk_size < len(words):
+                            chunk += " "
+                        
+                        data = {
+                            "type": "content",
+                            "content": chunk,
+                            "finished": False
+                        }
+                        yield f"data: {json.dumps(data)}\n\n"
+                        await asyncio.sleep(0.1)
+                else:
+                    yield f"data: {json.dumps({'type': 'content', 'content': 'No relevant information found in local knowledge base.', 'finished': False})}\n\n"
+                
+                yield f"data: {json.dumps({'type': 'done', 'content': '', 'finished': True})}\n\n"
+                
+        except Exception as e:
+            logger.error({"message": "Streaming hybrid query failed", "error": str(e)})
+            error_data = {
+                "type": "error",
+                "content": f"Query processing failed: {str(e)}",
+                "finished": True
+            }
+            yield f"data: {json.dumps(error_data)}\n\n"
+
+# Streaming functionality removed - all responses are now standard HTTP responses
 
 @router.get("/test-redhat-search")
 async def test_redhat_search():
@@ -821,7 +1315,9 @@ FORMATTING REQUIREMENTS:
 • Format file paths, configurations, and technical terms clearly
 • Use consistent indentation for sub-steps
 
-{{context}}{conversation_context}
+{{context}}
+
+{conversation_context}
 Question: {{question}}
 Answer (use proper formatting with numbered steps and clear structure):"""
             
@@ -851,6 +1347,7 @@ ANALYSIS APPROACH:
 3. Provide specific examples, commands, or configurations when available
 4. Cite document sources for your information
 5. If information is incomplete, clearly state what's missing
+6. Use conversation history to maintain context and refer back to previous exchanges when relevant
 
 FORMATTING STANDARDS:
 • Structure responses with numbered procedures (1., 2., 3.) for step-by-step instructions
@@ -868,7 +1365,9 @@ SPECIAL INSTRUCTIONS FOR LIVE DATA:
 - Combine static documentation with live data to provide comprehensive answers
 - When suggesting commands, consider the current cluster state from live data
 
-Context: {{context}}{conversation_context}
+Context: {{context}}
+
+{conversation_context}
 
 Question: {{question}}
 

@@ -1,4 +1,6 @@
 import ReactMarkdown from 'react-markdown';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { CircleAlert, Copy, Check } from 'lucide-react';
 import { useState } from 'react';
 
@@ -130,29 +132,55 @@ function Message({ message }) {
   // Split message content into markdown/code blocks and plain text
   const content = String(message.content);
   const parts = [];
-  const regex = /```([\s\S]*?)```/g;
+  
+  // Enhanced regex to catch more code block patterns
+  const codeBlockRegex = /```(?:([a-zA-Z0-9_+-]+)\s*)?\n?([\s\S]*?)\n?```/g;
   let lastIndex = 0;
   let match;
-  while ((match = regex.exec(content)) !== null) {
+  
+  while ((match = codeBlockRegex.exec(content)) !== null) {
     if (match.index > lastIndex) {
       parts.push({ type: 'text', value: content.slice(lastIndex, match.index) });
     }
     
-    // Clean up code block - remove language identifier from first line
-    let codeContent = match[1];
-    const lines = codeContent.split('\n');
+    // Extract language and code content
+    const language = match[1] || '';
+    let codeContent = match[2] || '';
     
-    // Check if first line is a language identifier (common ones: bash, yaml, javascript, python, etc.)
-    if (lines.length > 1 && lines[0].trim().match(/^(bash|yaml|yml|javascript|js|python|py|java|cpp|c|html|css|sql|json|xml|sh|shell|powershell|ps1|typescript|ts|go|rust|php|ruby|perl|scala|kotlin|swift|dart|r|matlab|octave|lua|vim|dockerfile|makefile|cmake|nginx|apache|config|conf|ini|properties|toml)$/i)) {
-      // Remove the language identifier line
-      codeContent = lines.slice(1).join('\n');
-    }
+    // Clean up code content
+    codeContent = codeContent.trim();
     
-    parts.push({ type: 'code', value: codeContent });
-    lastIndex = regex.lastIndex;
+    parts.push({ 
+      type: 'code', 
+      value: codeContent,
+      language: language
+    });
+    lastIndex = codeBlockRegex.lastIndex;
   }
+  
   if (lastIndex < content.length) {
-    parts.push({ type: 'text', value: content.slice(lastIndex) });
+    const remainingText = content.slice(lastIndex);
+    if (remainingText.trim()) {
+      parts.push({ type: 'text', value: remainingText });
+    }
+  }
+  
+  // If no code blocks were found, check for inline code patterns
+  if (parts.length === 0 || (parts.length === 1 && parts[0].type === 'text')) {
+    // Check for single-line code blocks or commands
+    const singleLineCodeRegex = /^(\s*)([\$#>]\s*.+|[a-zA-Z_][a-zA-Z0-9_]*\s*=.+|.*\.(sh|py|js|yml|yaml|json|xml|html|css|sql).*|.*\w+\s*\([^)]*\)\s*\{.*|.*\bfunction\b.*|.*\bclass\b.*|.*\bimport\b.*|.*\bfrom\b.*|.*\bdef\b.*|.*\bif\b.*|.*\bfor\b.*|.*\bwhile\b.*|.*\btry\b.*|.*\bcatch\b.*|.*\bthrow\b.*)$/gm;
+    
+    const textContent = parts.length > 0 ? parts[0].value : content;
+    const codeMatches = Array.from(textContent.matchAll(singleLineCodeRegex));
+    
+    if (codeMatches.length > 2) { // If multiple code-like lines detected
+      parts.splice(0, parts.length); // Clear existing parts
+      parts.push({ 
+        type: 'code', 
+        value: textContent,
+        language: 'text'
+      });
+    }
   }
 
   return (
@@ -188,7 +216,9 @@ function Message({ message }) {
                   className="bg-gradient-to-r from-gray-800 to-gray-900 text-gray-100 rounded-2xl p-6 my-4 overflow-hidden border border-gray-700 shadow-lg font-mono text-sm relative"
                 >
                   <div className="flex items-center justify-between mb-3">
-                    <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Code</span>
+                    <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                      {part.language ? `${part.language} Code` : 'Code'}
+                    </span>
                     <div className="flex items-center space-x-3">
                       <button
                         onClick={() => copyToClipboard(part.value, `code-${idx}`)}
@@ -215,22 +245,21 @@ function Message({ message }) {
                     </div>
                   </div>
                   <div className="overflow-x-auto">
-                    <ReactMarkdown
-                      components={{
-                        pre: ({ children }) => (
-                          <pre className="bg-transparent p-0 m-0 text-sm leading-relaxed">
-                            {children}
-                          </pre>
-                        ),
-                        code: ({ children }) => (
-                          <code className="text-gray-100 bg-transparent">
-                            {children}
-                          </code>
-                        ),
+                    <SyntaxHighlighter
+                      language={part.language || 'text'}
+                      style={vscDarkPlus}
+                      customStyle={{
+                        background: 'transparent',
+                        margin: 0,
+                        padding: 0,
+                        fontSize: '0.875rem',
+                        lineHeight: '1.5'
                       }}
+                      wrapLines={true}
+                      wrapLongLines={true}
                     >
-                      {'```\n' + part.value + '\n```'}
-                    </ReactMarkdown>
+                      {part.value}
+                    </SyntaxHighlighter>
                   </div>
                 </div>
               ) : (
@@ -241,6 +270,36 @@ function Message({ message }) {
                     if (stepFormatted) {
                       return <div className="space-y-2">{stepFormatted}</div>;
                     }
+                    
+                    // Pre-process text to better detect code patterns
+                    const preprocessText = (text) => {
+                      // Convert common code patterns to proper markdown code blocks
+                      let processedText = text;
+                      
+                      // Pattern 1: Lines starting with $ or # (shell commands)
+                      processedText = processedText.replace(/^(\$|#)\s(.+)$/gm, '```bash\n$1 $2\n```');
+                      
+                      // Pattern 2: YAML-like content (key: value patterns)
+                      const yamlPattern = /^(\s*[a-zA-Z_][a-zA-Z0-9_-]*:\s*.+(\n\s*[a-zA-Z_][a-zA-Z0-9_-]*:\s*.+)*)/gm;
+                      processedText = processedText.replace(yamlPattern, '```yaml\n$1\n```');
+                      
+                      // Pattern 3: JSON-like content
+                      const jsonPattern = /(\{[^{}]*"[^"]*"[^{}]*\}|\[[^\[\]]*"[^"]*"[^\[\]]*\])/g;
+                      processedText = processedText.replace(jsonPattern, '```json\n$1\n```');
+                      
+                      // Pattern 4: Function/method definitions
+                      const functionPattern = /^(.*function\s+\w+\s*\([^)]*\)|.*def\s+\w+\s*\([^)]*\)|.*class\s+\w+)(.*)$/gm;
+                      processedText = processedText.replace(functionPattern, '```\n$1$2\n```');
+                      
+                      // Pattern 5: Variable assignments
+                      const assignmentPattern = /^([a-zA-Z_][a-zA-Z0-9_]*\s*=\s*.+)$/gm;
+                      processedText = processedText.replace(assignmentPattern, '```\n$1\n```');
+                      
+                      return processedText;
+                    };
+                    
+                    // Apply preprocessing
+                    const processedValue = preprocessText(part.value);
                     
                     // Fall back to ReactMarkdown for regular content
                     return (
@@ -308,34 +367,54 @@ function Message({ message }) {
                         />
                       ),
                       pre: ({ node, children, ...props }) => {
-                        const textContent = children && typeof children === 'object' && children.props && children.props.children 
-                          ? String(children.props.children) 
-                          : String(children);
+                        // Extract code content and language
+                        const codeElement = children && children.props ? children : null;
+                        const textContent = codeElement?.props?.children || String(children);
+                        const language = codeElement?.props?.className?.replace('language-', '') || 'text';
                         const preIndex = `pre-${idx}-${Math.random()}`;
                         
                         return (
-                          <div className="relative group">
-                            <pre 
-                              {...props} 
-                              className="overflow-x-auto whitespace-pre-wrap break-words bg-gray-100 rounded-lg p-4 text-sm font-mono pr-12" 
-                            />
-                            <button
-                              onClick={() => copyToClipboard(textContent, preIndex)}
-                              className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 flex items-center space-x-1 px-2 py-1 bg-gray-200 hover:bg-gray-300 rounded text-xs transition-all cursor-pointer"
-                              title="Copy code"
-                            >
-                              {copiedStates[preIndex] ? (
-                                <>
-                                  <Check className="w-3 h-3 text-green-600" />
-                                  <span className="text-green-600">Copied</span>
-                                </>
-                              ) : (
-                                <>
-                                  <Copy className="w-3 h-3 text-gray-600" />
-                                  <span className="text-gray-600">Copy</span>
-                                </>
-                              )}
-                            </button>
+                          <div className="relative group my-4">
+                            <div className="bg-gray-800 rounded-lg overflow-hidden">
+                              <div className="flex items-center justify-between px-4 py-2 bg-gray-700">
+                                <span className="text-xs font-semibold text-gray-300 uppercase">
+                                  {language !== 'text' ? language : 'Code'}
+                                </span>
+                                <button
+                                  onClick={() => copyToClipboard(textContent, preIndex)}
+                                  className="flex items-center space-x-1 px-2 py-1 bg-gray-600 hover:bg-gray-500 rounded text-xs transition-all cursor-pointer"
+                                  title="Copy code"
+                                >
+                                  {copiedStates[preIndex] ? (
+                                    <>
+                                      <Check className="w-3 h-3 text-green-400" />
+                                      <span className="text-green-400">Copied</span>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Copy className="w-3 h-3 text-gray-300" />
+                                      <span className="text-gray-300">Copy</span>
+                                    </>
+                                  )}
+                                </button>
+                              </div>
+                              <div className="p-4">
+                                <SyntaxHighlighter
+                                  language={language !== 'text' ? language : 'bash'}
+                                  style={vscDarkPlus}
+                                  customStyle={{
+                                    background: 'transparent',
+                                    margin: 0,
+                                    padding: 0,
+                                    fontSize: '0.875rem'
+                                  }}
+                                  wrapLines={true}
+                                  wrapLongLines={true}
+                                >
+                                  {textContent}
+                                </SyntaxHighlighter>
+                              </div>
+                            </div>
                           </div>
                         );
                       },
@@ -439,7 +518,7 @@ function Message({ message }) {
                       ),
                     }}
                   >
-                    {part.value}
+                    {processedValue}
                   </ReactMarkdown>
                     );
                   })()}

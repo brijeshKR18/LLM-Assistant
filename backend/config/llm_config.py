@@ -53,8 +53,8 @@ EMBEDDING_CONFIGS = {
 RETRIEVAL_CONFIGS = {
     "k": 8,              # Retrieve more documents for better coverage
     "score_threshold": 0.7,  # Filter low-relevance results
-    "max_tokens_per_doc": 1000,  # Limit document chunk size
-    "overlap": 200       # Chunk overlap for better context
+    "max_tokens_per_doc": 2000,  # Increased document chunk size for fuller content
+    "overlap": 300       # Increased chunk overlap for better context
 }
 
 # Prompt optimization templates
