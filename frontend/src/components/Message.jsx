@@ -165,22 +165,9 @@ function Message({ message }) {
     }
   }
   
-  // If no code blocks were found, check for inline code patterns
-  if (parts.length === 0 || (parts.length === 1 && parts[0].type === 'text')) {
-    // Check for single-line code blocks or commands
-    const singleLineCodeRegex = /^(\s*)([\$#>]\s*.+|[a-zA-Z_][a-zA-Z0-9_]*\s*=.+|.*\.(sh|py|js|yml|yaml|json|xml|html|css|sql).*|.*\w+\s*\([^)]*\)\s*\{.*|.*\bfunction\b.*|.*\bclass\b.*|.*\bimport\b.*|.*\bfrom\b.*|.*\bdef\b.*|.*\bif\b.*|.*\bfor\b.*|.*\bwhile\b.*|.*\btry\b.*|.*\bcatch\b.*|.*\bthrow\b.*)$/gm;
-    
-    const textContent = parts.length > 0 ? parts[0].value : content;
-    const codeMatches = Array.from(textContent.matchAll(singleLineCodeRegex));
-    
-    if (codeMatches.length > 2) { // If multiple code-like lines detected
-      parts.splice(0, parts.length); // Clear existing parts
-      parts.push({ 
-        type: 'code', 
-        value: textContent,
-        language: 'text'
-      });
-    }
+  // Only use proper markdown code blocks - disable auto-detection that causes false positives
+  if (parts.length === 0) {
+    parts.push({ type: 'text', value: content });
   }
 
   return (
@@ -272,28 +259,13 @@ function Message({ message }) {
                     }
                     
                     // Pre-process text to better detect code patterns
+                    // Only apply minimal preprocessing to avoid false positives
                     const preprocessText = (text) => {
-                      // Convert common code patterns to proper markdown code blocks
+                      // Only process very specific patterns that are clearly code
                       let processedText = text;
                       
-                      // Pattern 1: Lines starting with $ or # (shell commands)
-                      processedText = processedText.replace(/^(\$|#)\s(.+)$/gm, '```bash\n$1 $2\n```');
-                      
-                      // Pattern 2: YAML-like content (key: value patterns)
-                      const yamlPattern = /^(\s*[a-zA-Z_][a-zA-Z0-9_-]*:\s*.+(\n\s*[a-zA-Z_][a-zA-Z0-9_-]*:\s*.+)*)/gm;
-                      processedText = processedText.replace(yamlPattern, '```yaml\n$1\n```');
-                      
-                      // Pattern 3: JSON-like content
-                      const jsonPattern = /(\{[^{}]*"[^"]*"[^{}]*\}|\[[^\[\]]*"[^"]*"[^\[\]]*\])/g;
-                      processedText = processedText.replace(jsonPattern, '```json\n$1\n```');
-                      
-                      // Pattern 4: Function/method definitions
-                      const functionPattern = /^(.*function\s+\w+\s*\([^)]*\)|.*def\s+\w+\s*\([^)]*\)|.*class\s+\w+)(.*)$/gm;
-                      processedText = processedText.replace(functionPattern, '```\n$1$2\n```');
-                      
-                      // Pattern 5: Variable assignments
-                      const assignmentPattern = /^([a-zA-Z_][a-zA-Z0-9_]*\s*=\s*.+)$/gm;
-                      processedText = processedText.replace(assignmentPattern, '```\n$1\n```');
+                      // Only shell commands that clearly start with $ or # followed by space
+                      processedText = processedText.replace(/^(\$|#)\s+(.+)$/gm, '```bash\n$1 $2\n```');
                       
                       return processedText;
                     };

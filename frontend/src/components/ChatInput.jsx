@@ -202,7 +202,7 @@ function ChatInput() {
                         ? 'text-emerald-600 group-hover:text-violet-700' 
                         : 'text-gray-600 group-hover:text-violet-700'
                   }`}>
-                    {useHybridSearch ? 'Hybrid' : 'Local'}
+                    {useHybridSearch ? 'Web' : 'Local'}
                   </span>
                 </div>
               </motion.button>
