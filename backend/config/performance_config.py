@@ -1,23 +1,23 @@
-# Performance-optimized configurations for faster response times
+# Performance-optimized configurations for maximum output quality
 
-# Fast response configurations (sacrificing some accuracy for speed)
+# Maximum response configurations (prioritizing detailed responses over speed)
 FAST_LLM_CONFIGS = {
     "mistral:instruct": {
         "temperature": 0.3,
-        "top_k": 20,         # Reduced for faster sampling
+        "top_k": 20,         
         "top_p": 0.9,
-        "num_ctx": 4096,     # Reduced context window for speed
+        "num_ctx": 32768,    # Maximum context window for mistral:instruct
         "repeat_penalty": 1.1,
-        "num_predict": 1024,  # Reduced max response length
+        "num_predict": 2048, # Maximum response length for detailed answers
         "stop": ["</s>", "[INST]", "[/INST]"]
     },
     "llama3.1:8b": {
         "temperature": 0.2,
-        "top_k": 15,         # Reduced for faster sampling
+        "top_k": 15,         
         "top_p": 0.9,
-        "num_ctx": 8192,     # Reduced from 16384
+        "num_ctx": 16384,    # Keep existing for llama3.1
         "repeat_penalty": 1.05,
-        "num_predict": 1024,  # Reduced from 1024
+        "num_predict": 2048, # Increased response length
         "stop": ["<|eot_id|>", "<|end_of_text|>"]
     }
 }

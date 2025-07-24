@@ -46,9 +46,9 @@ except ImportError:
             "temperature": 0.3,
             "top_k": 20,
             "top_p": 0.9,
-            "num_ctx": 4096,     # Reduced for speed
+            "num_ctx": 32768,    # Maximum context window for mistral:instruct
             "repeat_penalty": 1.1,
-            "num_predict": 256,  # Reduced for speed
+            "num_predict": 2048, # Increased response length for detailed answers
         }
     }
     
@@ -57,9 +57,9 @@ except ImportError:
             "temperature": 0.2,
             "top_k": 30,
             "top_p": 0.8,
-            "num_ctx": 8192,
+            "num_ctx": 32768,    # Maximum context window for mistral:instruct
             "repeat_penalty": 1.1,
-            "num_predict": 512
+            "num_predict": 2048  # Increased response length for detailed answers
         },
         "llama3.1:8b": {
             "temperature": 0.1,
@@ -272,31 +272,67 @@ else:
 # Initialize QA chain with offline LLM if vector store exists
 if vector_store and llm:
     try:
-        # Offline-only prompt template with enhanced formatting
-        offline_prompt_template = """You are an AI assistant that ONLY uses the provided context to answer questions.
+        # Advanced prompt template with industry best practices
+        offline_prompt_template = """# Enterprise Technical Assistant
 
-STRICT RULES:
-1. You do NOT have access to the internet or any external information
-2. You can ONLY use information from the context provided below
-3. If the context doesn't contain the answer, say "I cannot answer this question based on the provided documents"
-4. Do NOT use your general knowledge or training data
-5. Always cite which document or source your answer comes from
-6. You answer the prompt by combining the provided context and the information you get by indexing vector store
+You are a specialized AI assistant with deep expertise in OpenShift, Kubernetes, Red Hat Enterprise Linux, and enterprise IT infrastructure. You operate in a secure, offline environment with access only to approved technical documentation.
 
-FORMATTING GUIDELINES:
-- Use clear, numbered steps for procedures (1., 2., 3., etc.)
-- Use bullet points (•) for lists of items or features
-- Use proper headings with **bold text** for sections
-- Format code blocks with triple backticks (```)
-- Use line breaks between different sections for readability
-- Number multi-step processes clearly and consistently
-- Format commands with proper indentation and syntax
+## Core Principles
+🎯 **Accuracy**: Provide precise, actionable information based solely on the provided context
+📚 **Source Attribution**: Always cite specific documents and sections  
+🔧 **Practical Focus**: Include working commands, configurations, and examples
+⚠️ **Safety First**: Validate all recommendations and note potential risks
+🔄 **Contextual Awareness**: Build upon conversation history when relevant
 
-Context: {context}
+## Knowledge Boundaries
+- ✅ USE: Only information from the provided context documents
+- ✅ REFERENCE: Live OpenShift cluster data when available
+- ✅ COMBINE: Static documentation with real-time system information
+- ❌ AVOID: Assumptions, or outdated information
+- ❌ NEVER: Provide information not supported by the context
 
-Question: {question}
+## Response Structure
 
-Answer based ONLY on the provided context (use proper formatting with numbered steps, bullet points, and clear structure):"""
+### 🔍 Understanding
+[Brief acknowledgment of what you're being asked]
+
+### 💡 Solution Overview  
+[High-level approach to addressing the question]
+
+### 📋 Step-by-Step Implementation
+1. **Preparation**
+   - Prerequisites and requirements
+   - Initial system checks
+
+2. **Main Procedure**
+   ```bash
+   # Provide actual commands with explanations
+   oc command --option value  # What this accomplishes
+   ```
+
+3. **Verification**
+   - How to confirm success
+   - Expected outputs
+
+### ⚡ Key Points
+- **Important considerations**
+- **Potential gotchas**
+- **Best practices**
+
+### 📖 Sources Referenced
+- [Document/Section where information was found]
+
+### 🔧 Troubleshooting
+[Common issues and solutions if space permits]
+
+## Context Documents
+{context}
+
+## Current Question
+{question}
+
+## Expert Response
+[Provide your response following the structure above, adapting sections as needed for the specific question type]"""
 
         OFFLINE_PROMPT = PromptTemplate(
             template=offline_prompt_template,
@@ -572,246 +608,6 @@ CONTEXTUAL ANSWER:"""
         logger.error({"message": "Hybrid query failed", "error": str(e)})
         raise HTTPException(status_code=500, detail=f"Hybrid query processing failed: {str(e)}")
 
-# Streaming endpoint removed - using standard responses only
-# @router.post("/hybrid-query-stream") - REMOVED
-
-@router.get("/test-redhat-search")
-async def test_redhat_search():
-    """Handle queries using hybrid local + web knowledge with streaming response."""
-    global hybrid_system
-    
-    if not hybrid_system:
-        raise HTTPException(status_code=503, detail="Hybrid knowledge system not initialized")
-    
-    query = input.query.strip()
-    use_web = input.use_web_search
-    
-    logger.info({
-        "message": "Received streaming hybrid query",
-        "query": query[:100],
-        "use_web_search": use_web
-    })
-    
-    async def generate_streaming_response():
-        try:
-            # Handle greetings first
-            greeting_response = is_greeting(query)
-            if greeting_response:
-                yield f"data: {json.dumps({'type': 'content', 'content': greeting_response, 'finished': True})}\n\n"
-                return
-            
-            if use_web:
-                # Stream status updates during hybrid search
-                yield f"data: {json.dumps({'type': 'status', 'content': 'Initializing hybrid search...', 'finished': False})}\n\n"
-                await asyncio.sleep(0.3)
-                
-                yield f"data: {json.dumps({'type': 'status', 'content': 'Searching local knowledge base...', 'finished': False})}\n\n"
-                await asyncio.sleep(0.4)
-                
-                yield f"data: {json.dumps({'type': 'status', 'content': 'Fetching web documentation...', 'finished': False})}\n\n"
-                await asyncio.sleep(0.5)
-                
-                # Get hybrid results
-                hybrid_result = hybrid_system.hybrid_search(query)
-                
-                yield f"data: {json.dumps({'type': 'status', 'content': 'Processing information...', 'finished': False})}\n\n"
-                await asyncio.sleep(0.3)
-                
-                # Send sources information
-                sources_data = {
-                    "type": "sources",
-                    "sources": hybrid_result['sources'],
-                    "has_local": hybrid_result['has_local'],
-                    "has_web": hybrid_result['has_web'],
-                    "search_type": "hybrid",
-                    "finished": False
-                }
-                yield f"data: {json.dumps(sources_data)}\n\n"
-                
-                yield f"data: {json.dumps({'type': 'status', 'content': 'Generating response...', 'finished': False})}\n\n"
-                await asyncio.sleep(0.2)
-                
-                # Create enhanced prompt for hybrid context
-                hybrid_prompt = f"""You are an AI assistant with access to both local documentation and current web information from trusted sources.
-
-INSTRUCTIONS:
-1. Use both local knowledge and web information to provide comprehensive answers
-2. Prioritize information from official documentation and trusted sources
-3. If there are conflicts between sources, explain the differences
-4. Provide the most current and accurate information available
-5. Give clear, professional responses without indicating the source type in your answer
-
-FORMATTING REQUIREMENTS:
-• Use numbered lists (1., 2., 3.) for step-by-step procedures
-• Use bullet points (•) for feature lists or requirements
-• Format commands in code blocks with proper syntax highlighting
-• Use **bold** for important concepts or section headers
-• Use clear paragraph breaks between different topics
-
-CONTEXT:
-{hybrid_result['context']}
-
-QUESTION: {query}
-
-COMPREHENSIVE ANSWER:"""
-
-                # Use the existing LLM to process hybrid context
-                from backend.config.performance_config import FAST_LLM_CONFIGS
-                
-                model_config = FAST_LLM_CONFIGS.get("mistral:instruct", {})
-                
-                llm_instance = OllamaLLM(
-                    model="mistral:instruct",
-                    base_url="http://localhost:11434",
-                    **model_config,
-                    system="You are an expert AI assistant with access to both local documentation and current web information. Always format your responses professionally with numbered procedures (1., 2., 3.), bullet points (•) for lists, code blocks with triple backticks (```), and **bold** for important concepts. Structure your answers clearly with proper paragraph breaks and logical organization."
-                )
-                
-                # Stream the response
-                response = llm_instance.invoke(hybrid_prompt)
-                
-                # Stream the response in chunks
-                words = response.split()
-                chunk_size = 5  # Send 5 words at a time
-                
-                for i in range(0, len(words), chunk_size):
-                    chunk = " ".join(words[i:i + chunk_size])
-                    if i + chunk_size < len(words):
-                        chunk += " "
-                    
-                    data = {
-                        "type": "content",
-                        "content": chunk,
-                        "finished": False
-                    }
-                    yield f"data: {json.dumps(data)}\n\n"
-                    await asyncio.sleep(0.1)
-                
-                # Send completion signal
-                yield f"data: {json.dumps({'type': 'done', 'content': '', 'finished': True})}\n\n"
-                
-            else:
-                # Local-only search with streaming
-                yield f"data: {json.dumps({'type': 'status', 'content': 'Searching local knowledge base...', 'finished': False})}\n\n"
-                await asyncio.sleep(0.4)
-                
-                local_result = hybrid_system.get_local_results(query)
-                
-                # Structure local sources
-                local_sources = []
-                for src in local_result['sources']:
-                    source_path = src.get('source', 'Unknown')
-                    filename = source_path.split('/')[-1] if '/' in source_path else source_path.split('\\')[-1]
-                    local_sources.append({
-                        "type": "local",
-                        "filename": filename,
-                        "resource": filename
-                    })
-                
-                # Send sources
-                sources_data = {
-                    "type": "sources",
-                    "sources": local_sources,
-                    "has_local": bool(local_result['answer']),
-                    "has_web": False,
-                    "search_type": "local_only",
-                    "finished": False
-                }
-                yield f"data: {json.dumps(sources_data)}\n\n"
-                
-                # Stream the local response
-                if local_result['answer']:
-                    words = local_result['answer'].split()
-                    chunk_size = 5
-                    
-                    for i in range(0, len(words), chunk_size):
-                        chunk = " ".join(words[i:i + chunk_size])
-                        if i + chunk_size < len(words):
-                            chunk += " "
-                        
-                        data = {
-                            "type": "content",
-                            "content": chunk,
-                            "finished": False
-                        }
-                        yield f"data: {json.dumps(data)}\n\n"
-                        await asyncio.sleep(0.1)
-                else:
-                    yield f"data: {json.dumps({'type': 'content', 'content': 'No relevant information found in local knowledge base.', 'finished': False})}\n\n"
-                
-                yield f"data: {json.dumps({'type': 'done', 'content': '', 'finished': True})}\n\n"
-                
-        except Exception as e:
-            logger.error({"message": "Streaming hybrid query failed", "error": str(e)})
-            error_data = {
-                "type": "error",
-                "content": f"Query processing failed: {str(e)}",
-                "finished": True
-            }
-            yield f"data: {json.dumps(error_data)}\n\n"
-
-# Streaming functionality removed - all responses are now standard HTTP responses
-
-@router.get("/test-redhat-search")
-async def test_redhat_search():
-    """Test endpoint to verify Red Hat docs search functionality with specific URLs."""
-    try:
-        if not hybrid_system:
-            return {"status": "error", "message": "Hybrid system not initialized"}
-        
-        # Test query
-        test_query = "OpenShift post installation configuration"
-        categories = hybrid_system.web_search.determine_website_category(test_query)
-        search_urls = hybrid_system.web_search.build_search_urls(test_query, categories)
-        
-        # Test fetching from one URL
-        sample_results = []
-        for url in search_urls[:2]:  # Test first 2 URLs
-            try:
-                result = hybrid_system.web_search.fetch_page_content(url)
-                if result:
-                    sample_results.append({
-                        "url": result["url"],
-                        "title": result["title"],
-                        "doc_type": result.get("doc_type", "Unknown"),
-                        "content_length": len(result["content"]),
-                        "success": True
-                    })
-                else:
-                    sample_results.append({
-                        "url": url,
-                        "success": False,
-                        "reason": "No content extracted"
-                    })
-            except Exception as e:
-                sample_results.append({
-                    "url": url,
-                    "success": False,
-                    "reason": str(e)
-                })
-        
-        return {
-            "status": "success",
-            "test_query": test_query,
-            "categories_detected": categories,
-            "search_urls": search_urls,
-            "sample_results": sample_results,
-            "documentation_urls": {
-                "openshift_postinstall": "https://docs.redhat.com/en/documentation/openshift_container_platform/4.19/html/postinstallation_configuration/index",
-                "openshift_virtualization": "https://docs.redhat.com/en/documentation/openshift_container_platform/4.19/html/virtualization/index",
-                "rhel_installation": "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/10/html/interactively_installing_rhel_from_installation_media/index",
-                "ansible_automation": "https://docs.redhat.com/en/documentation/red_hat_ansible_automation_platform/2.5"
-            },
-            "message": f"Using specific Red Hat documentation URLs instead of generic searches"
-        }
-    except Exception as e:
-        logger.error({"message": "Red Hat search test failed", "error": str(e)})
-        return {
-            "status": "error", 
-            "message": f"Test failed: {str(e)}",
-            "suggestion": "Check if internet connection is available and Red Hat documentation URLs are accessible"
-        }
-
 @router.post("/query")
 async def query_llm(input: QueryInput):
     """Handle configuration queries with enhanced robustness and chat session isolation."""
@@ -952,14 +748,14 @@ async def query_llm(input: QueryInput):
             # Fallback to regular config if fast config not available
             base_config = LLM_CONFIGS.get(model, LLM_CONFIGS["mistral:instruct"])
         
-        # Speed-optimized adjustments - allow more tokens for better formatting
+        # Maximum response settings - allow high token counts for detailed responses
         query_adjustments = {
-            "technical_config": {"num_predict": 400, "num_ctx": 3072},
-            "troubleshooting": {"num_predict": 450, "num_ctx": 3072}, 
-            "code_analysis": {"num_predict": 350, "num_ctx": 2048},
-            "comparison": {"num_predict": 500, "num_ctx": 3072},
-            "step_by_step": {"num_predict": 600, "num_ctx": 3072},  # More tokens for detailed steps
-            "general_info": {"num_predict": 400, "num_ctx": 3072}
+            "technical_config": {"num_predict": 2048, "num_ctx": 32768},
+            "troubleshooting": {"num_predict": 2048, "num_ctx": 32768}, 
+            "code_analysis": {"num_predict": 1536, "num_ctx": 32768},
+            "comparison": {"num_predict": 2048, "num_ctx": 32768},
+            "step_by_step": {"num_predict": 2048, "num_ctx": 32768},  # Maximum tokens for detailed steps
+            "general_info": {"num_predict": 2048, "num_ctx": 32768}
         }
         
         # Apply query-specific adjustments
@@ -1067,7 +863,27 @@ async def query_llm(input: QueryInput):
         
         # Get optimized prompt based on query classification
         try:
-            # Use basic prompt template since optimization modules are removed
+            # Import advanced prompt templates
+            from backend.config.advanced_prompts import get_optimized_prompt, detect_query_type
+            
+            # Detect query type and get appropriate prompt
+            query_type_detected = detect_query_type(query)
+            optimized_prompt_text, detected_type = get_optimized_prompt(query, enhanced_context, conversation_context)
+            
+            logger.info({
+                "message": "Using advanced prompt template",
+                "query_type": detected_type,
+                "prompt_optimization": "enabled"
+            })
+            
+            PROMPT = PromptTemplate(
+                template=optimized_prompt_text,
+                input_variables=["context", "question"]
+            )
+            
+        except ImportError as import_error:
+            logger.warning({"message": "Advanced prompts not available, using enhanced fallback", "error": str(import_error)})
+            # Use enhanced fallback prompt template
             conversation_context = ""
             if conversation_history:
                 conversation_context = "\n\nConversation History:\n"
@@ -1077,25 +893,44 @@ async def query_llm(input: QueryInput):
                     conversation_context += f"{role.upper()}: {content}\n"
                 conversation_context += "\n"
             
-            prompt_text = f"""Use the following pieces of context to answer the question at the end. If you don't know the answer based on the provided context, just say that you don't know, don't try to make up an answer.
-            
-            THIS IS AN ISOLATED CHAT SESSION - only use information from the provided context and conversation history below. Do not reference information from other conversations or sessions.
+            # Enhanced fallback prompt with better structure
+            prompt_text = f"""# Technical Documentation Assistant
 
-FORMATTING REQUIREMENTS:
-• Structure your answer with clear numbered steps for procedures (1., 2., 3.)
-• Use bullet points (•) for lists of features or requirements
-• Format code blocks and commands with triple backticks (```)
-• Use **bold text** for important concepts or section headers
-• Create clear paragraph breaks between different topics
-• Number complex multi-step processes with proper hierarchy
+## Your Role
+You are a specialized technical consultant with expertise in OpenShift, Kubernetes, and Red Hat Enterprise Linux.
+
+## Instructions
+- **Source Limitation**: Use ONLY the provided context and conversation history
+- **Session Isolation**: This is an isolated chat session - don't reference other conversations
+- **Response Quality**: Provide clear, actionable guidance with proper formatting
+
+## Response Format Requirements
+### Structure
+• Use numbered lists (1., 2., 3.) for step-by-step procedures
+• Use bullet points (•) for feature lists and requirements  
+• Create clear section breaks between different topics
+
+### Code & Commands
+```bash
+# Format all commands with explanations
+oc get pods  # Lists all pods in current namespace
+```
+
+### Emphasis
+• Use **bold text** for important concepts and warnings
+• Use proper hierarchy for complex procedures (1.1, 1.2, etc.)
 • Format file paths, configurations, and technical terms clearly
-• Use consistent indentation for sub-steps
 
+## Knowledge Base
 {{context}}
 
 {conversation_context}
-Question: {{question}}
-Answer (use proper formatting with numbered steps and clear structure):"""
+
+## Current Question
+{{question}}
+
+## Expert Response
+[Provide comprehensive guidance following the format requirements above]"""
             
             PROMPT = PromptTemplate(
                 template=prompt_text,
@@ -1113,41 +948,117 @@ Answer (use proper formatting with numbered steps and clear structure):"""
                     conversation_context += f"{role.upper()}: {content}\n"
                 conversation_context += "\n"
             
-            prompt_template = f"""You are a specialized technical assistant with expertise in OpenShift, Kubernetes, Red Hat Enterprise Linux, and IT infrastructure.
+            prompt_template = f"""# Advanced Technical Assistant - Enterprise Systems Expert
 
-THIS IS AN ISOLATED CHAT SESSION - only use information from the provided context and conversation history below. Do not reference information from other conversations or sessions.
+## Identity & Expertise
+You are a senior technical consultant with 15+ years of experience in enterprise container platforms, specifically OpenShift, Kubernetes, and Red Hat Enterprise Linux. You provide authoritative guidance to system administrators and DevOps engineers.
 
-ANALYSIS APPROACH:
-1. Carefully analyze the provided context documents
-2. Extract relevant information that directly answers the question
-3. Provide specific examples, commands, or configurations when available
-4. Cite document sources for your information
-5. If information is incomplete, clearly state what's missing
-6. Use conversation history to maintain context and refer back to previous exchanges when relevant
+## Session Context
+**ISOLATED CHAT SESSION**: This conversation is independent. Use only the provided context and conversation history below. Do not reference other sessions or external knowledge.
 
-FORMATTING STANDARDS:
-• Structure responses with numbered procedures (1., 2., 3.) for step-by-step instructions
-• Use bullet points (•) for feature lists, requirements, or options
-• Format all code blocks and commands with triple backticks (```)
-• Use **bold formatting** for important concepts, warnings, or section headers
-• Create clear paragraph separation between different topics
-• Use proper hierarchy for complex procedures (1.1, 1.2, etc.)
-• Format file paths, URLs, and technical terms with consistent styling
-• Indent sub-steps appropriately for better readability
+## Knowledge Sources Available
+- 📄 **Technical Documentation**: Official guides, procedures, and best practices
+- 🔴 **Live Cluster Data**: Real-time OpenShift cluster information (when available)  
+- 💬 **Conversation History**: Previous exchanges in this session for context continuity
 
-SPECIAL INSTRUCTIONS FOR LIVE DATA:
-- If you see "Live OpenShift Data" sections, these contain current cluster information
-- Live data takes precedence over static documentation when there are conflicts
-- Combine static documentation with live data to provide comprehensive answers
-- When suggesting commands, consider the current cluster state from live data
+## Analysis Methodology
+1. **Context Deep Dive**: Thoroughly analyze all provided documentation
+2. **Information Synthesis**: Cross-reference multiple sources for completeness
+3. **Practical Application**: Focus on actionable, implementable solutions
+4. **Risk Assessment**: Identify potential issues and mitigation strategies
+5. **Knowledge Gaps**: Clearly identify missing information
+6. **Historical Context**: Reference previous conversation when building upon earlier topics
 
-Context: {{context}}
+## Response Excellence Standards
 
+### 🎯 **Structure & Clarity**
+- **Logical Flow**: Organize information from overview to implementation
+- **Visual Hierarchy**: Use clear headings, lists, and code blocks
+- **Scannable Content**: Enable quick comprehension and reference
+
+### 🔧 **Technical Precision**
+- **Exact Commands**: Provide copy-paste ready code with explanations
+- **Parameter Details**: Explain command options and configuration values
+- **Version Awareness**: Note version-specific differences when relevant
+- **Environment Context**: Consider cluster state and configuration
+
+### 📚 **Documentation Standards**
+```bash
+# Command structure with clear explanations
+oc get pods -n namespace --selector=app=myapp  # Lists pods matching label selector
+```
+
+### ⚠️ **Safety & Best Practices**
+- **Backup Recommendations**: Suggest safety measures before changes
+- **Impact Assessment**: Explain consequences of actions
+- **Rollback Procedures**: Provide recovery steps when applicable
+- **Security Considerations**: Highlight security implications
+
+## Special Instructions for Live Data Integration
+- **Priority Hierarchy**: Live cluster data > Static documentation > General knowledge
+- **Conflict Resolution**: When live data contradicts docs, explain discrepancies
+- **Current State Analysis**: Use real-time information for accurate recommendations
+- **Dynamic Troubleshooting**: Adapt solutions based on actual cluster conditions
+
+## Response Template
+
+### 🔍 **Situation Analysis**
+[Understanding of the request and current state]
+
+### 💡 **Recommended Approach**
+[Strategy and rationale for the solution]
+
+### 📋 **Implementation Guide**
+
+#### Prerequisites
+- [Requirements and preparation steps]
+
+#### Step-by-Step Procedure
+1. **Initial Assessment**
+   ```bash
+   # Verification commands
+   oc status  # Check cluster health
+   ```
+
+2. **Main Implementation**
+   ```bash
+   # Primary commands with detailed explanations
+   oc create -f config.yaml  # Creates resource from configuration
+   ```
+
+3. **Validation & Testing**
+   ```bash
+   # Verification steps
+   oc get resource-type  # Confirm successful deployment
+   ```
+
+### ✅ **Verification Checklist**
+- [ ] [Key validation points]
+- [ ] [Expected outcomes]
+
+### 📖 **Sources & References**
+- [Specific documents and sections used]
+
+### 🔧 **Troubleshooting Guide**
+**Common Issues:**
+- Issue: [Problem description]
+  - Solution: [Resolution steps]
+
+### ⚡ **Key Takeaways**
+- [Critical points to remember]
+- [Best practices highlighted]
+
+## Knowledge Base Context
 {conversation_context}
 
-Question: {{question}}
+## Documentation Context
+{{context}}
 
-WELL-FORMATTED RESPONSE (use numbered steps, bullet points, code blocks, and proper structure):"""
+## Current Question
+{{question}}
+
+## Expert Technical Response
+[Deliver comprehensive guidance following the template above, adapting sections based on question complexity and type]"""
 
             PROMPT = PromptTemplate(
                 template=prompt_template,
@@ -1216,11 +1127,17 @@ WELL-FORMATTED RESPONSE (use numbered steps, bullet points, code blocks, and pro
 
     # Execute query with offline enforcement and quality assessment
     try:
+        # Record start time for performance tracking
+        start_time = time.time()
+        
         # Validate offline mode before processing
         if not validate_offline_mode():
             logger.warning({"message": "Offline mode validation failed, but proceeding with query"})
         
         result = qa_chain.invoke({"query": validated_query})
+        
+        # Calculate processing time
+        processing_time = time.time() - start_time
         
         # Validate response
         if not result["source_documents"]:
@@ -1229,6 +1146,29 @@ WELL-FORMATTED RESPONSE (use numbered steps, bullet points, code blocks, and pro
                 "answer": "Sorry, I couldn't find relevant information in the available documents to answer your question. Please note that I can only access information from uploaded documents and cannot search the internet.",
                 "sources": []
             }
+
+        # Record prompt performance metrics
+        try:
+            from backend.config.prompt_optimization import record_prompt_metrics
+            
+            # Determine prompt type used
+            prompt_type = "advanced" if 'detected_type' in locals() else "fallback"
+            actual_query_type = detected_type if 'detected_type' in locals() else query_type
+            
+            record_prompt_metrics(
+                prompt_type=prompt_type,
+                query_type=actual_query_type,
+                query=query,
+                response=result["result"],
+                sources=[doc.metadata for doc in result["source_documents"]],
+                processing_time=processing_time,
+                context_length=len(enhanced_context),
+                session_id=chat_id,
+                model_used=model
+            )
+            
+        except Exception as metrics_error:
+            logger.warning({"message": "Failed to record prompt metrics", "error": str(metrics_error)})
 
         # Enhanced response quality assessment
         try:
@@ -1527,6 +1467,32 @@ async def clear_openshift_cache():
         "cache_size_before": cache_size,
         "cache_size_after": 0
     }
+
+@router.get("/debug/prompt-performance")
+async def get_prompt_performance():
+    """Get prompt performance analytics and optimization recommendations."""
+    try:
+        from backend.config.prompt_optimization import get_prompt_performance_summary
+        
+        performance_data = get_prompt_performance_summary()
+        return {
+            "status": "success",
+            "performance_analytics": performance_data,
+            "timestamp": time.time()
+        }
+        
+    except ImportError:
+        return {
+            "status": "unavailable",
+            "message": "Prompt performance tracking not available",
+            "reason": "prompt_optimization module not found"
+        }
+    except Exception as e:
+        logger.error({"message": "Failed to get prompt performance", "error": str(e)})
+        return {
+            "status": "error",
+            "message": f"Failed to retrieve performance data: {str(e)}"
+        }
 
 @router.get("/debug/offline-status")
 async def check_offline_status():

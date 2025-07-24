@@ -1,44 +1,25 @@
-# Optimized LLM Configuration for better accuracy and performance
+# Optimized LLM Configuration for maximum output quality and detailed responses
 
 # Model-specific optimizations
 LLM_CONFIGS = {
     "mistral:instruct": {
         "temperature": 0.2,  # Lower for more focused responses
-        "top_k": 20,         # Reduced for better speed (was 30)
+        "top_k": 20,         
         "top_p": 0.8,        # Slightly lower for more precision
-        "num_ctx": 4096,     # Reduced context window for speed (was 8192)
+        "num_ctx": 32768,    # Maximum context window for mistral:instruct
         "repeat_penalty": 1.1,
-        "num_predict": 256,  # Reduced max response length for speed (was 512)
+        "num_predict": 2048, # Maximum response length for detailed answers
         "stop": ["</s>", "[INST]", "[/INST]"]
     },
     "llama3.1:8b": {
         "temperature": 0.1,
-        "top_k": 15,         # Reduced for better speed (was 25)
+        "top_k": 15,         
         "top_p": 0.85,
-        "num_ctx": 8192,     # Reduced from 16384 for speed
+        "num_ctx": 16384,    # Keep existing for llama3.1
         "repeat_penalty": 1.05,
-        "num_predict": 512,  # Reduced from 1024 for speed
+        "num_predict": 2048, # Increased response length
         "stop": ["<|eot_id|>", "<|end_of_text|>"]
     },
-    # Fast model alternatives
-    "phi3:mini": {
-        "temperature": 0.2,
-        "top_k": 15,
-        "top_p": 0.9,
-        "num_ctx": 4096,
-        "repeat_penalty": 1.1,
-        "num_predict": 256,
-        "stop": ["<|end|>"]
-    },
-    "gemma2:2b": {
-        "temperature": 0.2,
-        "top_k": 15,
-        "top_p": 0.9,
-        "num_ctx": 8192,
-        "repeat_penalty": 1.05,
-        "num_predict": 256,
-        "stop": ["<end_of_turn>"]
-    }
 }
 
 # Embedding model optimizations

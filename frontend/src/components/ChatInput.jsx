@@ -125,15 +125,12 @@ function ChatInput() {
                 placeholder="Ask me anything..."
                 className="w-full px-6 py-4 pr-16 bg-transparent border-0 focus:ring-0 focus:outline-none resize-none text-gray-900 placeholder-gray-500 font-medium"
                 disabled={isLoading}
-                rows={1}
+                rows={3}
                 style={{
-                  minHeight: '56px',
-                  maxHeight: '140px',
+                  height: '80px',        // Fixed height instead of auto-resizing
+                  minHeight: '80px',     // Consistent minimum height
+                  maxHeight: '80px',     // Consistent maximum height
                   resize: 'none'
-                }}
-                onInput={(e) => {
-                  e.target.style.height = 'auto';
-                  e.target.style.height = Math.min(e.target.scrollHeight, 140) + 'px';
                 }}
               />
               

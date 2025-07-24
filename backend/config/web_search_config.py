@@ -32,7 +32,6 @@ TRUSTED_WEBSITES = {
     ]
 }
 
-# Version-specific URLs for OpenShift documentation
 OPENSHIFT_VERSION_URLS = {
     "4.16": "https://docs.redhat.com/en/documentation/openshift_container_platform/4.16",
     "4.17": "https://docs.redhat.com/en/documentation/openshift_container_platform/4.17",
@@ -88,8 +87,8 @@ CONTENT_FILTER = {
 
 # Hybrid response configuration
 HYBRID_CONFIG = {
-    "local_weight": 0.0,      # 30% weight to local documents
-    "web_weight": 1.0,        # 70% weight to web content
+    "local_weight": 0.4,      # 30% weight to local documents
+    "web_weight": 0.6,        # 70% weight to web content
     "merge_strategy": "complement",  # "complement" or "verify" or "expand"
     "max_hybrid_context": 64000,  # Further increased context limit for full responses
     "prioritize_local": True,     # Show local results first
